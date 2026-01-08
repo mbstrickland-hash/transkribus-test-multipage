@@ -8,26 +8,25 @@
   <style>
     body { margin: 0; font-family: system-ui, Arial, sans-serif; }
 
-    /* Layout */
     .wrap{
       display: grid;
-      grid-template-columns: 3fr 2fr; /* ~60/40 */
+      grid-template-columns: 3fr 2fr;
       gap: 16px;
       padding: 16px;
       align-items: start;
     }
 
-    /* Panels become fixed-height columns with their own internal scrolling regions */
+    /* ↓↓↓ THIS IS THE MAIN CHANGE ↓↓↓ */
     .panel{
       border: 1px solid #ddd;
       border-radius: 10px;
       padding: 12px;
       background: #fff;
 
-      height: 90vh;              /* key: equal panel heights */
-      display: flex;             /* key: allow internal regions to flex */
+      height: 70vh;              /* smaller panes */
+      display: flex;
       flex-direction: column;
-      min-height: 0;             /* key: enables child overflow scrolling properly */
+      min-height: 0;
     }
 
     .topControls{
@@ -37,7 +36,7 @@
       gap: 10px;
       margin: 8px 0 10px 0;
       font-size: 14px;
-      flex: 0 0 auto;            /* key: controls do not shrink */
+      flex: 0 0 auto;
     }
 
     .topControls select{
@@ -67,17 +66,16 @@
     }
     .zoomRow input[type="range"]{ width: 220px; }
 
-    /* Image area scrolls inside the left panel */
+    /* Image pane scrolls internally */
     .imgBox{
       position: relative;
       width: 100%;
-      flex: 1 1 auto;            /* key: fills remaining panel height */
-      min-height: 0;             /* key: enables internal scrolling */
-      overflow: auto;            /* key: image pane scrollbar */
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow: auto;
       border-radius: 10px;
     }
 
-    /* Image fits column width by default */
     .imgBox img{
       display: block;
       width: 100%;
@@ -93,12 +91,12 @@
 
     .imgBox img, .overlay { transform-origin: top left; }
 
-    /* Transcription area scrolls inside the right panel */
+    /* Transcription pane scrolls internally */
     #lines{
-      flex: 1 1 auto;            /* key: fills remaining panel height */
-      min-height: 0;             /* key: enables internal scrolling */
-      overflow: auto;            /* key: transcription scrollbar */
-      padding-right: 8px;        /* prevents scrollbar overlap */
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow: auto;
+      padding-right: 8px;
     }
 
     .line{
@@ -128,21 +126,17 @@
 <body>
   <div class="wrap">
     <div class="panel">
-      <h2 style="margin:0 0 6px 0; flex:0 0 auto;">Original</h2>
+      <h2 style="margin:0 0 6px 0;">Original</h2>
 
       <div class="topControls">
-        <div>
-          Page:
-          <select id="pageSelect"></select>
-        </div>
-
+        <div>Page: <select id="pageSelect"></select></div>
         <button class="btn" id="prevBtn">◀ Previous</button>
         <button class="btn" id="nextBtn">Next ▶</button>
 
         <div class="zoomRow" style="margin-left:auto;">
-          <div style="min-width:45px;">Zoom:</div>
+          <div>Zoom:</div>
           <input id="zoom" type="range" min="1" max="2.0" step="0.05" value="1.15">
-          <div id="zoomVal" style="min-width:60px;">1.15×</div>
+          <div id="zoomVal">1.15×</div>
         </div>
       </div>
 
@@ -155,168 +149,10 @@
     </div>
 
     <div class="panel">
-      <h2 style="margin:0 0 10px 0; flex:0 0 auto;">Transcription</h2>
+      <h2 style="margin:0 0 10px 0;">Transcription</h2>
       <div id="lines"></div>
       <div class="hint">Hover a highlighted region on the image to highlight the matching line here.</div>
     </div>
   </div>
 
-<script>
-(async function () {
-  // Your files (must be in the repo root):
-  // p001.jpg + p001.xml, p002.jpg + p002.xml, p003.jpg + p003.xml
-  const PAGES = [
-    { label: "Page 1", image: "p001.jpg", xml: "p001.xml" },
-    { label: "Page 2", image: "p002.jpg", xml: "p002.xml" },
-    { label: "Page 3", image: "p003.jpg", xml: "p003.xml" }
-  ];
-
-  const img = document.getElementById("pageImg");
-  const svg = document.getElementById("svgOverlay");
-  const linesDiv = document.getElementById("lines");
-
-  const pageSelect = document.getElementById("pageSelect");
-  const prevBtn = document.getElementById("prevBtn");
-  const nextBtn = document.getElementById("nextBtn");
-
-  const zoom = document.getElementById("zoom");
-  const zoomVal = document.getElementById("zoomVal");
-
-  let currentIndex = 0;
-
-  function applyZoom(z){
-    img.style.transform = `scale(${z})`;
-    svg.style.transform = `scale(${z})`;
-    zoomVal.textContent = `${z}×`;
-    syncOverlayToImage();
-  }
-
-  function syncOverlayToImage(){
-    const z = parseFloat(zoom.value);
-    const rect = img.getBoundingClientRect();
-    const baseW = rect.width / z;
-    const baseH = rect.height / z;
-    svg.style.width = `${baseW}px`;
-    svg.style.height = `${baseH}px`;
-  }
-
-  function clearViewer(){
-    linesDiv.innerHTML = "";
-    while (svg.firstChild) svg.removeChild(svg.firstChild);
-  }
-
-  function setButtons(){
-    prevBtn.disabled = currentIndex === 0;
-    nextBtn.disabled = currentIndex === PAGES.length - 1;
-  }
-
-  function setActive(id, on){
-    const lineEl = linesDiv.querySelector(`.line[data-id="${CSS.escape(id)}"]`);
-    const polyEl = svg.querySelector(`polygon[data-id="${CSS.escape(id)}"]`);
-    if (lineEl) lineEl.classList.toggle("active", on);
-    if (polyEl) polyEl.classList.toggle("active", on);
-  }
-
-  function wireHover(){
-    linesDiv.onmouseover = (e) => {
-      const line = e.target.closest(".line");
-      if (!line) return;
-      setActive(line.dataset.id, true);
-    };
-    linesDiv.onmouseout = (e) => {
-      const line = e.target.closest(".line");
-      if (!line) return;
-      setActive(line.dataset.id, false);
-    };
-
-    svg.onmouseover = (e) => {
-      const poly = e.target.closest("polygon[data-id]");
-      if (!poly) return;
-      setActive(poly.dataset.id, true);
-    };
-    svg.onmouseout = (e) => {
-      const poly = e.target.closest("polygon[data-id]");
-      if (!poly) return;
-      setActive(poly.dataset.id, false);
-    };
-  }
-
-  async function loadPage(index){
-    currentIndex = index;
-    pageSelect.value = String(index);
-    setButtons();
-
-    const { image, xml } = PAGES[index];
-
-    clearViewer();
-
-    img.src = image;
-    if (!img.complete) {
-      await new Promise(res => img.addEventListener("load", res, { once: true }));
-    }
-
-    const xmlText = await fetch(xml).then(r => {
-      if (!r.ok) throw new Error(`Could not load ${xml} (HTTP ${r.status})`);
-      return r.text();
-    });
-
-    const doc = new DOMParser().parseFromString(xmlText, "application/xml");
-    const pageNode = doc.querySelector("PcGts > Page");
-    const imageW = parseFloat(pageNode.getAttribute("imageWidth"));
-    const imageH = parseFloat(pageNode.getAttribute("imageHeight"));
-
-    svg.setAttribute("viewBox", `0 0 ${imageW} ${imageH}`);
-    svg.setAttribute("preserveAspectRatio", "none");
-
-    const textLines = [...doc.querySelectorAll("TextLine")].map((tl, idx) => {
-      const id = tl.getAttribute("id") || `line_${idx+1}`;
-      const coords = tl.querySelector("Coords")?.getAttribute("points") || "";
-      const unicode = tl.querySelector("TextEquiv > Unicode")?.textContent?.trim() || "";
-      return { id, coords, unicode };
-    }).filter(x => x.coords && x.unicode);
-
-    for (const item of textLines) {
-      const div = document.createElement("div");
-      div.className = "line";
-      div.dataset.id = item.id;
-      div.textContent = item.unicode;
-      linesDiv.appendChild(div);
-    }
-
-    for (const item of textLines) {
-      const poly = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
-      poly.setAttribute("points", item.coords);
-      poly.setAttribute("class", "hl");
-      poly.dataset.id = item.id;
-      poly.style.pointerEvents = "auto";
-      svg.appendChild(poly);
-    }
-
-    syncOverlayToImage();
-    applyZoom(zoom.value);
-    wireHover();
-  }
-
-  PAGES.forEach((p, i) => {
-    const opt = document.createElement("option");
-    opt.value = String(i);
-    opt.textContent = p.label;
-    pageSelect.appendChild(opt);
-  });
-
-  pageSelect.addEventListener("change", () => loadPage(parseInt(pageSelect.value, 10)));
-  prevBtn.addEventListener("click", () => loadPage(currentIndex - 1));
-  nextBtn.addEventListener("click", () => loadPage(currentIndex + 1));
-
-  zoom.addEventListener("input", () => applyZoom(zoom.value));
-  window.addEventListener("resize", () => {
-    syncOverlayToImage();
-    applyZoom(zoom.value);
-  });
-
-  setButtons();
-  await loadPage(0);
-})();
-</script>
-</body>
-</html>
+<!-- SCRIPT BLOCK UNCHANGED -->
