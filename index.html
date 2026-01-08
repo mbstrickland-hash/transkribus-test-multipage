@@ -48,7 +48,13 @@ select, .btn{
 .zoomWrap{
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
+}
+
+.zoomBtn{
+  padding: 4px 10px;
+  font-size: 16px;
+  line-height: 1;
 }
 
 #zoomVal{
@@ -104,7 +110,6 @@ img{
   stroke: rgba(0,0,0,.6);
 }
 
-/* Persistent bottom page turner */
 .bottomTurner{
   margin-top: 10px;
   display: flex;
@@ -118,7 +123,6 @@ img{
   font-size: 14px;
 }
 
-/* Friendly instruction block */
 .helpNote{
   margin-top: 10px;
   padding: 10px 12px;
@@ -129,21 +133,7 @@ img{
   font-size: 13px;
   line-height: 1.3;
 }
-.helpNote strong{ font-weight: 600; }
-.helpNote ul{
-  margin: 8px 0 0 18px;
-  padding: 0;
-}
-.helpNote li{ margin: 3px 0; }
-kbd{
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-  border: 1px solid #ddd;
-  border-bottom-width: 2px;
-  border-radius: 6px;
-  padding: 0 6px;
-  background: #fff;
-  font-size: 12px;
-}
+.helpNote ul{ margin: 6px 0 0 18px; }
 </style>
 </head>
 
@@ -152,7 +142,6 @@ kbd{
 
   <!-- IMAGE PANEL -->
   <div class="panel">
-    <!-- TOP CONTROLS -->
     <div class="topControls">
       <span>Page:</span>
       <select id="pageSelect"></select>
@@ -164,35 +153,35 @@ kbd{
 
       <span style="margin-left:auto;"></span>
 
+      <!-- ZOOM CONTROLS -->
       <div class="zoomWrap">
         <span>Zoom:</span>
+        <button class="btn zoomBtn" id="zoomOut">−</button>
         <input id="zoom" type="range" min="1" max="2.5" step="0.05" value="1.25">
+        <button class="btn zoomBtn" id="zoomIn">+</button>
         <span id="zoomVal">1.25×</span>
       </div>
     </div>
 
-    <!-- IMAGE -->
     <div class="imgBox" id="imgBox">
       <img id="img" alt="Document page">
       <svg class="overlay" id="svg"></svg>
     </div>
 
-    <!-- BOTTOM PAGE TURNER -->
     <div class="bottomTurner">
       <button class="btn" id="prevBottom">◀ Previous</button>
       <span id="indicatorBottom"></span>
       <button class="btn" id="nextBottom">Next ▶</button>
     </div>
 
-    <!-- FRIENDLY INSTRUCTIONS (LEFT) -->
     <div class="helpNote">
       <strong>How to use this viewer</strong>
       <ul>
-        <li><strong>Move the page:</strong> click and drag on the image.</li>
-        <li><strong>Zoom:</strong> use your mouse wheel/trackpad scroll, or the Zoom slider above.</li>
-        <li><strong>Jump to a line:</strong> click a transcription line (right) to jump the image to that line.</li>
-        <li><strong>Find the matching text:</strong> click a highlighted line on the image to jump the transcription.</li>
-        <li><strong>Quick check:</strong> hover over a line (either side) to highlight the match.</li>
+        <li>Drag the image to move it.</li>
+        <li>Zoom with mouse wheel, slider, or + / − buttons.</li>
+        <li>Click a transcription line to jump the image to that line.</li>
+        <li>Click a highlighted line on the image to jump the transcription.</li>
+        <li>Hover over a line to preview the match.</li>
       </ul>
     </div>
   </div>
@@ -201,13 +190,11 @@ kbd{
   <div class="panel">
     <div id="linePane"></div>
 
-    <!-- FRIENDLY INSTRUCTIONS (RIGHT) -->
     <div class="helpNote">
-      <strong>Tip for reading</strong>
+      <strong>Reading tip</strong>
       <ul>
-        <li>Click any line to synchronize the image.</li>
-        <li>Use the page controls to move through the document.</li>
-        <li>If you “lose your place,” click the line you’re reading to re-center the manuscript view.</li>
+        <li>Click lines to re-center the manuscript view.</li>
+        <li>Use page controls above or below to navigate.</li>
       </ul>
     </div>
   </div>
@@ -229,6 +216,8 @@ kbd{
 
   const zoomInput=document.getElementById("zoom");
   const zoomVal=document.getElementById("zoomVal");
+  const zoomInBtn=document.getElementById("zoomIn");
+  const zoomOutBtn=document.getElementById("zoomOut");
 
   const pageSelect=document.getElementById("pageSelect");
   const indicatorTop=document.getElementById("indicatorTop");
@@ -244,23 +233,24 @@ kbd{
   let imgW=1,imgH=1;
 
   function setZoomUI(){
-    zoomInput.value = zoom.toFixed(2);
-    zoomVal.textContent = zoom.toFixed(2) + "×";
+    zoomInput.value=zoom.toFixed(2);
+    zoomVal.textContent=zoom.toFixed(2)+"×";
   }
 
   function applyZoom(z){
-    zoom = Math.min(2.5, Math.max(1, z));
-    img.style.transform = `scale(${zoom})`;
-    svg.style.transform = `scale(${zoom})`;
+    zoom=Math.min(2.5,Math.max(1,z));
+    img.style.transform=`scale(${zoom})`;
+    svg.style.transform=`scale(${zoom})`;
     setZoomUI();
   }
 
   zoomInput.oninput=()=>applyZoom(+zoomInput.value);
+  zoomInBtn.onclick=()=>applyZoom(zoom+0.1);
+  zoomOutBtn.onclick=()=>applyZoom(zoom-0.1);
 
   imgBox.addEventListener("wheel",(e)=>{
     e.preventDefault();
-    const step=0.1;
-    applyZoom(zoom + (e.deltaY<0?step:-step));
+    applyZoom(zoom+(e.deltaY<0?0.1:-0.1));
   },{passive:false});
 
   let drag=false,sx,sy,sl,st;
@@ -274,10 +264,9 @@ kbd{
   window.onmousemove=e=>{
     if(!drag)return;
     imgBox.scrollLeft=sl-(e.clientX-sx);
-    imgBox.scrollTop =st-(e.clientY-sy);
+    imgBox.scrollTop=st-(e.clientY-sy);
   };
   window.onmouseup=()=>{drag=false;imgBox.classList.remove("dragging");};
-  window.onblur=()=>{drag=false;imgBox.classList.remove("dragging");};
 
   function bbox(pts){
     const xs=[],ys=[];
@@ -295,12 +284,12 @@ kbd{
     const scaleX=(img.clientWidth/zoom)/imgW;
     const scaleY=(img.clientHeight/zoom)/imgH;
     imgBox.scrollLeft=b.cx*scaleX*zoom-imgBox.clientWidth/2;
-    imgBox.scrollTop =b.cy*scaleY*zoom-imgBox.clientHeight/2;
+    imgBox.scrollTop=b.cy*scaleY*zoom-imgBox.clientHeight/2;
   }
 
   function scrollTextTo(id){
     const el=lines.querySelector(`.line[data-id="${CSS.escape(id)}"]`);
-    if(el) el.scrollIntoView({block:"center"});
+    if(el)el.scrollIntoView({block:"center"});
   }
 
   function setActive(id){
@@ -313,12 +302,8 @@ kbd{
     const text=`Page ${page+1} of ${PAGES.length}`;
     indicatorTop.textContent=text;
     indicatorBottom.textContent=text;
-
-    const atStart=page===0;
-    const atEnd=page===PAGES.length-1;
-
-    prevTop.disabled=prevBottom.disabled=atStart;
-    nextTop.disabled=nextBottom.disabled=atEnd;
+    prevTop.disabled=prevBottom.disabled=page===0;
+    nextTop.disabled=nextBottom.disabled=page===PAGES.length-1;
   }
 
   async function load(i){
@@ -329,7 +314,6 @@ kbd{
     lines.innerHTML="";
     svg.innerHTML="";
     imgBox.scrollLeft=imgBox.scrollTop=0;
-
     img.src=PAGES[page].image;
 
     const xml=await fetch(PAGES[page].xml).then(r=>r.text());
@@ -350,13 +334,8 @@ kbd{
       div.className="line";
       div.dataset.id=id;
       div.textContent=txt;
-
-      // CLICK = sync
       div.onclick=()=>{setActive(id);scrollImageTo(id);};
-
-      // HOVER = highlight only
       div.onmouseenter=()=>setActive(id);
-
       lines.appendChild(div);
 
       const poly=document.createElementNS("http://www.w3.org/2000/svg","polygon");
@@ -364,13 +343,8 @@ kbd{
       poly.dataset.id=id;
       poly.classList.add("hl");
       poly.style.pointerEvents="auto";
-
-      // CLICK = sync
       poly.onclick=()=>{setActive(id);scrollTextTo(id);};
-
-      // HOVER = highlight only
       poly.onmouseenter=()=>setActive(id);
-
       svg.appendChild(poly);
     });
 
