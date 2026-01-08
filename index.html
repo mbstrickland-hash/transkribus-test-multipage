@@ -32,6 +32,7 @@ body { margin: 0; font-family: system-ui, Arial, sans-serif; }
   gap: 10px;
   margin-bottom: 10px;
   font-size: 14px;
+  flex-wrap: wrap;
 }
 
 select, .btn{
@@ -41,7 +42,21 @@ select, .btn{
   background: #f7f7f7;
 }
 
-.btn:disabled{ opacity: 0.5; }
+.btn{ cursor: pointer; user-select: none; }
+.btn:disabled{ opacity: 0.5; cursor: not-allowed; }
+
+.zoomWrap{
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+#zoomVal{
+  display: inline-block;
+  min-width: 56px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
 
 .imgBox{
   position: relative;
@@ -95,167 +110,221 @@ img{
 <body>
 <div class="wrap">
 
-<div class="panel">
-  <div class="topControls">
-    Page:
-    <select id="pageSelect"></select>
-    <button class="btn" id="prev">◀</button>
-    <button class="btn" id="next">▶</button>
-    <span id="indicator"></span>
-    Zoom:
-    <input id="zoom" type="range" min="1" max="2.5" step="0.05" value="1.25">
+  <div class="panel">
+    <div class="topControls">
+      <span>Page:</span>
+      <select id="pageSelect"></select>
+      <button class="btn" id="prev">◀</button>
+      <button class="btn" id="next">▶</button>
+      <span id="indicator"></span>
+
+      <span style="margin-left:auto;"></span>
+
+      <div class="zoomWrap">
+        <span>Zoom:</span>
+        <input id="zoom" type="range" min="1" max="2.5" step="0.05" value="1.25">
+        <span id="zoomVal">1.25×</span>
+      </div>
+    </div>
+
+    <div class="imgBox" id="imgBox">
+      <img id="img" alt="Document page">
+      <svg class="overlay" id="svg"></svg>
+    </div>
   </div>
 
-  <div class="imgBox" id="imgBox">
-    <img id="img">
-    <svg class="overlay" id="svg"></svg>
+  <div class="panel">
+    <div id="linePane"></div>
   </div>
-</div>
-
-<div class="panel">
-  <div id="linePane"></div>
-</div>
 
 </div>
 
 <script>
 (async()=>{
-const PAGES=[
- {label:"Page 1",image:"p001.jpg",xml:"p001.xml"},
- {label:"Page 2",image:"p002.jpg",xml:"p002.xml"},
- {label:"Page 3",image:"p003.jpg",xml:"p003.xml"}
-];
+  const PAGES=[
+    {label:"Page 1",image:"p001.jpg",xml:"p001.xml"},
+    {label:"Page 2",image:"p002.jpg",xml:"p002.xml"},
+    {label:"Page 3",image:"p003.jpg",xml:"p003.xml"}
+  ];
 
-const imgBox=document.getElementById("imgBox");
-const img=document.getElementById("img");
-const svg=document.getElementById("svg");
-const lines=document.getElementById("linePane");
-const zoomInput=document.getElementById("zoom");
-const pageSelect=document.getElementById("pageSelect");
-const indicator=document.getElementById("indicator");
-const prev=document.getElementById("prev");
-const next=document.getElementById("next");
+  const imgBox=document.getElementById("imgBox");
+  const img=document.getElementById("img");
+  const svg=document.getElementById("svg");
+  const lines=document.getElementById("linePane");
 
-let zoom=parseFloat(zoomInput.value);
-let page=0;
-let imgW=1,imgH=1;
+  const zoomInput=document.getElementById("zoom");
+  const zoomVal=document.getElementById("zoomVal");
 
-/* ---------- zoom & pan ---------- */
-function applyZoom(z){
- zoom=z;
- img.style.transform=`scale(${z})`;
- svg.style.transform=`scale(${z})`;
-}
-zoomInput.oninput=()=>applyZoom(+zoomInput.value);
+  const pageSelect=document.getElementById("pageSelect");
+  const indicator=document.getElementById("indicator");
+  const prev=document.getElementById("prev");
+  const next=document.getElementById("next");
 
-imgBox.addEventListener("wheel",e=>{
- e.preventDefault();
- applyZoom(Math.min(2.5,Math.max(1,zoom+(e.deltaY<0?.1:-.1))));
-},{passive:false});
+  let zoom=parseFloat(zoomInput.value);
+  let page=0;
+  let imgW=1,imgH=1;
 
-let drag=false,sx,sy,sl,st;
-imgBox.onmousedown=e=>{
- drag=true; sx=e.clientX; sy=e.clientY;
- sl=imgBox.scrollLeft; st=imgBox.scrollTop;
- imgBox.classList.add("dragging");
-};
-window.onmousemove=e=>{
- if(!drag)return;
- imgBox.scrollLeft=sl-(e.clientX-sx);
- imgBox.scrollTop =st-(e.clientY-sy);
-};
-window.onmouseup=()=>{drag=false;imgBox.classList.remove("dragging");};
+  function setZoomUI(){
+    zoomInput.value = zoom.toFixed(2);
+    zoomVal.textContent = zoom.toFixed(2) + "×";
+  }
 
-/* ---------- helpers ---------- */
-function bbox(pts){
- let xs=[],ys=[];
- pts.split(" ").forEach(p=>{
-  let [x,y]=p.split(",").map(Number);
-  xs.push(x); ys.push(y);
- });
- return {
-  cx:(Math.min(...xs)+Math.max(...xs))/2,
-  cy:(Math.min(...ys)+Math.max(...ys))/2
- };
-}
+  function applyZoom(z){
+    const minZ = parseFloat(zoomInput.min);
+    const maxZ = parseFloat(zoomInput.max);
+    zoom = Math.min(maxZ, Math.max(minZ, z));
 
-function scrollImageTo(id){
- const poly=svg.querySelector(`[data-id="${id}"]`);
- if(!poly)return;
- const b=bbox(poly.getAttribute("points"));
- const scaleX=(img.clientWidth/zoom)/imgW;
- const scaleY=(img.clientHeight/zoom)/imgH;
- imgBox.scrollLeft=b.cx*scaleX*zoom-imgBox.clientWidth/2;
- imgBox.scrollTop =b.cy*scaleY*zoom-imgBox.clientHeight/2;
-}
+    img.style.transform = `scale(${zoom})`;
+    svg.style.transform = `scale(${zoom})`;
 
-function scrollTextTo(id){
- const el=lines.querySelector(`[data-id="${id}"]`);
- if(el) el.scrollIntoView({block:"center"});
-}
+    setZoomUI();
+  }
 
-function setActive(id){
- document.querySelectorAll(".active").forEach(x=>x.classList.remove("active"));
- lines.querySelector(`[data-id="${id}"]`)?.classList.add("active");
- svg.querySelector(`[data-id="${id}"]`)?.classList.add("active");
-}
+  // Slider changes zoom
+  zoomInput.addEventListener("input", ()=>applyZoom(parseFloat(zoomInput.value)));
 
-/* ---------- load page ---------- */
-async function load(i){
- page=Math.max(0,Math.min(PAGES.length-1,i));
- pageSelect.value=page;
- indicator.textContent=`Page ${page+1} of ${PAGES.length}`;
- lines.innerHTML=""; svg.innerHTML="";
- img.src=PAGES[page].image;
+  // Mouse wheel changes zoom AND updates slider + number
+  imgBox.addEventListener("wheel",(e)=>{
+    e.preventDefault();
+    const step = 0.10;
+    const delta = (e.deltaY < 0) ? step : -step;
+    applyZoom(zoom + delta);
+  }, {passive:false});
 
- const xml=await fetch(PAGES[page].xml).then(r=>r.text());
- const doc=new DOMParser().parseFromString(xml,"application/xml");
- const pg=doc.querySelector("Page");
- imgW=+pg.getAttribute("imageWidth");
- imgH=+pg.getAttribute("imageHeight");
- svg.setAttribute("viewBox",`0 0 ${imgW} ${imgH}`);
+  // Drag-to-pan
+  let drag=false,sx=0,sy=0,sl=0,st=0;
+  imgBox.addEventListener("mousedown",(e)=>{
+    if (e.button !== 0) return;
+    drag=true; sx=e.clientX; sy=e.clientY;
+    sl=imgBox.scrollLeft; st=imgBox.scrollTop;
+    imgBox.classList.add("dragging");
+    e.preventDefault();
+  });
+  window.addEventListener("mousemove",(e)=>{
+    if(!drag) return;
+    imgBox.scrollLeft = sl - (e.clientX - sx);
+    imgBox.scrollTop  = st - (e.clientY - sy);
+  });
+  window.addEventListener("mouseup",()=>{
+    drag=false;
+    imgBox.classList.remove("dragging");
+  });
+  window.addEventListener("blur",()=>{
+    drag=false;
+    imgBox.classList.remove("dragging");
+  });
 
- doc.querySelectorAll("TextLine").forEach(t=>{
-  const id=t.getAttribute("id");
-  const pts=t.querySelector("Coords")?.getAttribute("points");
-  const txt=t.querySelector("Unicode")?.textContent;
-  if(!pts||!txt)return;
+  function bbox(pts){
+    const xs=[], ys=[];
+    pts.trim().split(/\s+/).forEach(p=>{
+      const [x,y]=p.split(",").map(Number);
+      if(Number.isFinite(x) && Number.isFinite(y)){ xs.push(x); ys.push(y); }
+    });
+    return {
+      cx:(Math.min(...xs)+Math.max(...xs))/2,
+      cy:(Math.min(...ys)+Math.max(...ys))/2
+    };
+  }
 
-  const div=document.createElement("div");
-  div.className="line";
-  div.dataset.id=id;
-  div.textContent=txt;
+  function scrollImageTo(id){
+    const poly=svg.querySelector(`polygon[data-id="${CSS.escape(id)}"]`);
+    if(!poly) return;
 
-  /* CLICK = sync */
-  div.onclick=()=>{setActive(id);scrollImageTo(id);};
+    const b=bbox(poly.getAttribute("points"));
+    // base displayed size = img.clientWidth/zoom (because img is transformed)
+    const scaleX=(img.clientWidth/zoom)/imgW;
+    const scaleY=(img.clientHeight/zoom)/imgH;
 
-  lines.appendChild(div);
+    imgBox.scrollLeft = b.cx * scaleX * zoom - imgBox.clientWidth/2;
+    imgBox.scrollTop  = b.cy * scaleY * zoom - imgBox.clientHeight/2;
+  }
 
-  const poly=document.createElementNS("http://www.w3.org/2000/svg","polygon");
-  poly.setAttribute("points",pts);
-  poly.dataset.id=id;
-  poly.classList.add("hl");
-  poly.style.pointerEvents="auto";
+  function scrollTextTo(id){
+    const el=lines.querySelector(`.line[data-id="${CSS.escape(id)}"]`);
+    if(el) el.scrollIntoView({block:"center"});
+  }
 
-  /* CLICK = sync */
-  poly.onclick=()=>{setActive(id);scrollTextTo(id);};
+  function setActive(id){
+    document.querySelectorAll(".active").forEach(x=>x.classList.remove("active"));
+    lines.querySelector(`.line[data-id="${CSS.escape(id)}"]`)?.classList.add("active");
+    svg.querySelector(`polygon[data-id="${CSS.escape(id)}"]`)?.classList.add("active");
+  }
 
-  svg.appendChild(poly);
- });
+  function updateNavUI(){
+    indicator.textContent = `Page ${page+1} of ${PAGES.length}`;
+    prev.disabled = page === 0;
+    next.disabled = page === PAGES.length - 1;
+  }
 
- applyZoom(zoom);
-}
+  async function load(i){
+    page=Math.max(0,Math.min(PAGES.length-1,i));
+    pageSelect.value=String(page);
+    updateNavUI();
 
-/* ---------- init ---------- */
-PAGES.forEach((p,i)=>{
- const o=document.createElement("option");
- o.value=i;o.textContent=p.label;
- pageSelect.appendChild(o);
-});
-pageSelect.onchange=()=>load(+pageSelect.value);
-prev.onclick=()=>load(page-1);
-next.onclick=()=>load(page+1);
-await load(0);
+    lines.innerHTML="";
+    svg.innerHTML="";
+    imgBox.scrollLeft = 0;
+    imgBox.scrollTop = 0;
+
+    img.src=PAGES[page].image;
+
+    const xml=await fetch(PAGES[page].xml).then(r=>r.text());
+    const doc=new DOMParser().parseFromString(xml,"application/xml");
+    const pg=doc.querySelector("Page") || doc.querySelector("PcGts > Page");
+    imgW=+pg.getAttribute("imageWidth") || 1;
+    imgH=+pg.getAttribute("imageHeight") || 1;
+    svg.setAttribute("viewBox",`0 0 ${imgW} ${imgH}`);
+
+    doc.querySelectorAll("TextLine").forEach((t, idx)=>{
+      const id=t.getAttribute("id") || `line_${idx+1}`;
+      const pts=t.querySelector("Coords")?.getAttribute("points");
+      const txt=t.querySelector("TextEquiv > Unicode")?.textContent?.trim()
+             || t.querySelector("Unicode")?.textContent?.trim();
+      if(!pts || !txt) return;
+
+      const div=document.createElement("div");
+      div.className="line";
+      div.dataset.id=id;
+      div.textContent=txt;
+
+      // CLICK = sync to image
+      div.addEventListener("click",()=>{ setActive(id); scrollImageTo(id); });
+
+      // HOVER = highlight only
+      div.addEventListener("mouseenter",()=>setActive(id));
+      lines.appendChild(div);
+
+      const poly=document.createElementNS("http://www.w3.org/2000/svg","polygon");
+      poly.setAttribute("points",pts);
+      poly.dataset.id=id;
+      poly.classList.add("hl");
+      poly.style.pointerEvents="auto";
+
+      // CLICK = sync to transcription
+      poly.addEventListener("click",()=>{ setActive(id); scrollTextTo(id); });
+
+      // HOVER = highlight only
+      poly.addEventListener("mouseenter",()=>setActive(id));
+      svg.appendChild(poly);
+    });
+
+    applyZoom(zoom); // keep current zoom and refresh UI text
+  }
+
+  // init dropdown
+  PAGES.forEach((p,i)=>{
+    const o=document.createElement("option");
+    o.value=String(i);
+    o.textContent=p.label;
+    pageSelect.appendChild(o);
+  });
+
+  pageSelect.addEventListener("change",()=>load(parseInt(pageSelect.value,10)));
+  prev.addEventListener("click",()=>load(page-1));
+  next.addEventListener("click",()=>load(page+1));
+
+  setZoomUI();
+  await load(0);
 })();
 </script>
 </body>
