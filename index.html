@@ -52,7 +52,6 @@ select, .btn{
 }
 
 #zoomVal{
-  display: inline-block;
   min-width: 56px;
   text-align: right;
   font-variant-numeric: tabular-nums;
@@ -104,19 +103,37 @@ img{
   fill: rgba(255,234,167,.65);
   stroke: rgba(0,0,0,.6);
 }
+
+/* Persistent bottom page turner */
+.bottomTurner{
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 10px;
+  border: 1px solid #e6e6e6;
+  border-radius: 10px;
+  background: #fff;
+  font-size: 14px;
+}
 </style>
 </head>
 
 <body>
 <div class="wrap">
 
+  <!-- IMAGE PANEL -->
   <div class="panel">
+    <!-- TOP CONTROLS -->
     <div class="topControls">
       <span>Page:</span>
       <select id="pageSelect"></select>
-      <button class="btn" id="prev">◀</button>
-      <button class="btn" id="next">▶</button>
-      <span id="indicator"></span>
+
+      <button class="btn" id="prevTop">◀</button>
+      <button class="btn" id="nextTop">▶</button>
+
+      <span id="indicatorTop"></span>
 
       <span style="margin-left:auto;"></span>
 
@@ -127,12 +144,21 @@ img{
       </div>
     </div>
 
+    <!-- IMAGE -->
     <div class="imgBox" id="imgBox">
       <img id="img" alt="Document page">
       <svg class="overlay" id="svg"></svg>
     </div>
+
+    <!-- BOTTOM PAGE TURNER -->
+    <div class="bottomTurner">
+      <button class="btn" id="prevBottom">◀ Previous</button>
+      <span id="indicatorBottom"></span>
+      <button class="btn" id="nextBottom">Next ▶</button>
+    </div>
   </div>
 
+  <!-- TRANSCRIPTION PANEL -->
   <div class="panel">
     <div id="linePane"></div>
   </div>
@@ -156,9 +182,13 @@ img{
   const zoomVal=document.getElementById("zoomVal");
 
   const pageSelect=document.getElementById("pageSelect");
-  const indicator=document.getElementById("indicator");
-  const prev=document.getElementById("prev");
-  const next=document.getElementById("next");
+  const indicatorTop=document.getElementById("indicatorTop");
+  const indicatorBottom=document.getElementById("indicatorBottom");
+
+  const prevTop=document.getElementById("prevTop");
+  const nextTop=document.getElementById("nextTop");
+  const prevBottom=document.getElementById("prevBottom");
+  const nextBottom=document.getElementById("nextBottom");
 
   let zoom=parseFloat(zoomInput.value);
   let page=0;
@@ -170,73 +200,52 @@ img{
   }
 
   function applyZoom(z){
-    const minZ = parseFloat(zoomInput.min);
-    const maxZ = parseFloat(zoomInput.max);
-    zoom = Math.min(maxZ, Math.max(minZ, z));
-
+    zoom = Math.min(2.5, Math.max(1, z));
     img.style.transform = `scale(${zoom})`;
     svg.style.transform = `scale(${zoom})`;
-
     setZoomUI();
   }
 
-  // Slider changes zoom
-  zoomInput.addEventListener("input", ()=>applyZoom(parseFloat(zoomInput.value)));
+  zoomInput.oninput=()=>applyZoom(+zoomInput.value);
 
-  // Mouse wheel changes zoom AND updates slider + number
   imgBox.addEventListener("wheel",(e)=>{
     e.preventDefault();
-    const step = 0.10;
-    const delta = (e.deltaY < 0) ? step : -step;
-    applyZoom(zoom + delta);
-  }, {passive:false});
+    const step=0.1;
+    applyZoom(zoom + (e.deltaY<0?step:-step));
+  },{passive:false});
 
-  // Drag-to-pan
-  let drag=false,sx=0,sy=0,sl=0,st=0;
-  imgBox.addEventListener("mousedown",(e)=>{
-    if (e.button !== 0) return;
+  let drag=false,sx,sy,sl,st;
+  imgBox.onmousedown=e=>{
+    if(e.button!==0)return;
     drag=true; sx=e.clientX; sy=e.clientY;
     sl=imgBox.scrollLeft; st=imgBox.scrollTop;
     imgBox.classList.add("dragging");
     e.preventDefault();
-  });
-  window.addEventListener("mousemove",(e)=>{
-    if(!drag) return;
-    imgBox.scrollLeft = sl - (e.clientX - sx);
-    imgBox.scrollTop  = st - (e.clientY - sy);
-  });
-  window.addEventListener("mouseup",()=>{
-    drag=false;
-    imgBox.classList.remove("dragging");
-  });
-  window.addEventListener("blur",()=>{
-    drag=false;
-    imgBox.classList.remove("dragging");
-  });
+  };
+  window.onmousemove=e=>{
+    if(!drag)return;
+    imgBox.scrollLeft=sl-(e.clientX-sx);
+    imgBox.scrollTop =st-(e.clientY-sy);
+  };
+  window.onmouseup=()=>{drag=false;imgBox.classList.remove("dragging");};
 
   function bbox(pts){
-    const xs=[], ys=[];
+    const xs=[],ys=[];
     pts.trim().split(/\s+/).forEach(p=>{
       const [x,y]=p.split(",").map(Number);
-      if(Number.isFinite(x) && Number.isFinite(y)){ xs.push(x); ys.push(y); }
+      if(Number.isFinite(x)&&Number.isFinite(y)){xs.push(x);ys.push(y);}
     });
-    return {
-      cx:(Math.min(...xs)+Math.max(...xs))/2,
-      cy:(Math.min(...ys)+Math.max(...ys))/2
-    };
+    return {cx:(Math.min(...xs)+Math.max(...xs))/2, cy:(Math.min(...ys)+Math.max(...ys))/2};
   }
 
   function scrollImageTo(id){
     const poly=svg.querySelector(`polygon[data-id="${CSS.escape(id)}"]`);
-    if(!poly) return;
-
+    if(!poly)return;
     const b=bbox(poly.getAttribute("points"));
-    // base displayed size = img.clientWidth/zoom (because img is transformed)
     const scaleX=(img.clientWidth/zoom)/imgW;
     const scaleY=(img.clientHeight/zoom)/imgH;
-
-    imgBox.scrollLeft = b.cx * scaleX * zoom - imgBox.clientWidth/2;
-    imgBox.scrollTop  = b.cy * scaleY * zoom - imgBox.clientHeight/2;
+    imgBox.scrollLeft=b.cx*scaleX*zoom-imgBox.clientWidth/2;
+    imgBox.scrollTop =b.cy*scaleY*zoom-imgBox.clientHeight/2;
   }
 
   function scrollTextTo(id){
@@ -250,48 +259,48 @@ img{
     svg.querySelector(`polygon[data-id="${CSS.escape(id)}"]`)?.classList.add("active");
   }
 
-  function updateNavUI(){
-    indicator.textContent = `Page ${page+1} of ${PAGES.length}`;
-    prev.disabled = page === 0;
-    next.disabled = page === PAGES.length - 1;
+  function updateIndicators(){
+    const text=`Page ${page+1} of ${PAGES.length}`;
+    indicatorTop.textContent=text;
+    indicatorBottom.textContent=text;
+
+    const atStart=page===0;
+    const atEnd=page===PAGES.length-1;
+
+    prevTop.disabled=prevBottom.disabled=atStart;
+    nextTop.disabled=nextBottom.disabled=atEnd;
   }
 
   async function load(i){
     page=Math.max(0,Math.min(PAGES.length-1,i));
     pageSelect.value=String(page);
-    updateNavUI();
+    updateIndicators();
 
     lines.innerHTML="";
     svg.innerHTML="";
-    imgBox.scrollLeft = 0;
-    imgBox.scrollTop = 0;
+    imgBox.scrollLeft=imgBox.scrollTop=0;
 
     img.src=PAGES[page].image;
 
     const xml=await fetch(PAGES[page].xml).then(r=>r.text());
     const doc=new DOMParser().parseFromString(xml,"application/xml");
-    const pg=doc.querySelector("Page") || doc.querySelector("PcGts > Page");
-    imgW=+pg.getAttribute("imageWidth") || 1;
-    imgH=+pg.getAttribute("imageHeight") || 1;
+    const pg=doc.querySelector("Page")||doc.querySelector("PcGts > Page");
+    imgW=+pg.getAttribute("imageWidth")||1;
+    imgH=+pg.getAttribute("imageHeight")||1;
     svg.setAttribute("viewBox",`0 0 ${imgW} ${imgH}`);
 
-    doc.querySelectorAll("TextLine").forEach((t, idx)=>{
-      const id=t.getAttribute("id") || `line_${idx+1}`;
+    doc.querySelectorAll("TextLine").forEach((t,idx)=>{
+      const id=t.getAttribute("id")||`line_${idx+1}`;
       const pts=t.querySelector("Coords")?.getAttribute("points");
-      const txt=t.querySelector("TextEquiv > Unicode")?.textContent?.trim()
-             || t.querySelector("Unicode")?.textContent?.trim();
-      if(!pts || !txt) return;
+      const txt=t.querySelector("Unicode")?.textContent;
+      if(!pts||!txt)return;
 
       const div=document.createElement("div");
       div.className="line";
       div.dataset.id=id;
       div.textContent=txt;
-
-      // CLICK = sync to image
-      div.addEventListener("click",()=>{ setActive(id); scrollImageTo(id); });
-
-      // HOVER = highlight only
-      div.addEventListener("mouseenter",()=>setActive(id));
+      div.onclick=()=>{setActive(id);scrollImageTo(id);};
+      div.onmouseenter=()=>setActive(id);
       lines.appendChild(div);
 
       const poly=document.createElementNS("http://www.w3.org/2000/svg","polygon");
@@ -299,19 +308,14 @@ img{
       poly.dataset.id=id;
       poly.classList.add("hl");
       poly.style.pointerEvents="auto";
-
-      // CLICK = sync to transcription
-      poly.addEventListener("click",()=>{ setActive(id); scrollTextTo(id); });
-
-      // HOVER = highlight only
-      poly.addEventListener("mouseenter",()=>setActive(id));
+      poly.onclick=()=>{setActive(id);scrollTextTo(id);};
+      poly.onmouseenter=()=>setActive(id);
       svg.appendChild(poly);
     });
 
-    applyZoom(zoom); // keep current zoom and refresh UI text
+    applyZoom(zoom);
   }
 
-  // init dropdown
   PAGES.forEach((p,i)=>{
     const o=document.createElement("option");
     o.value=String(i);
@@ -319,9 +323,9 @@ img{
     pageSelect.appendChild(o);
   });
 
-  pageSelect.addEventListener("change",()=>load(parseInt(pageSelect.value,10)));
-  prev.addEventListener("click",()=>load(page-1));
-  next.addEventListener("click",()=>load(page+1));
+  pageSelect.onchange=()=>load(+pageSelect.value);
+  prevTop.onclick=prevBottom.onclick=()=>load(page-1);
+  nextTop.onclick=nextBottom.onclick=()=>load(page+1);
 
   setZoomUI();
   await load(0);
