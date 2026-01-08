@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<PcGts xmlns="http://schema.primaresearch.org/PAGE/gts/pagecontent/2013-07-15" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://schema.primaresearch.org/PAGE/gts/pagecontent/2013-07-15 http://schema.primaresearch.org/PAGE/gts/pagecontent/2013-07-15/pagecontent.xsd">
+    <Metadata>
+        <Creator>prov=READ-COOP:name=TrHtr:version=2.33.0:model_id=356425:date=09_10_2025_01:19</Creator>
+        <Created>2025-10-08T14:33:23.295+02:00</Created>
+        <LastChange>2025-12-02T05:38:34.222+01:00</LastChange>
+        <TranskribusMetadata docId="11158241" pageId="104037280" pageNr="3" tsid="263431593" status="GT" userId="202909" imgUrl="https://files.transkribus.eu/Get?fileType=view&amp;id=PHJKRMIQEOJKOBRJWCHYFRMC" xmlUrl="https://files.transkribus.eu/Get?id=TZAUPILAQDKVWQOVKAJJRAJL" imageId="87306417"/>
+    </Metadata>
+    <Page imageFilename="0003_p003.jpg" imageWidth="3508" imageHeight="2479">
+        <ReadingOrder>
+            <OrderedGroup id="ro_1767900468918" caption="Regions reading order">
+                <RegionRefIndexed index="0" regionRef="tr_1"/>
+            </OrderedGroup>
+        </ReadingOrder>
+        <TextRegion orientation="0.0" id="tr_1" custom="readingOrder {index:0;}">
+            <Coords points="1860,302 1860,2325 3285,2325 3285,302"/>
+            <TextLine id="tr_1_tl_1" custom="readingOrder {index:0;}">
+                <Coords points="1958,376 2258,347 2359,396 2915,349 3068,404 3230,376 3230,248 2947,258 2797,327 2696,251 2544,297 2408,227 2285,227 2111,320 1958,313"/>
+                <Baseline points="1968,340 2031,349 2094,347 2157,343 2221,341 2284,340 2347,340 2411,340 2474,343 2537,343 2601,343 2664,343 2727,346 2790,346 2854,344 2917,343 2980,343 3044,343 3107,346 3170,343 3234,340"/>
+                <TextEquiv>
+                    <Unicode>At his Grace the Ld. Arch Bp</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="tr_1_tl_2" custom="readingOrder {index:1;}">
+                <Coords points="1862,541 1987,538 2110,473 2308,485 2388,536 2528,480 2866,522 3217,492 3202,372 2981,436 2669,356 2460,406 2209,357 1862,401"/>
+                <Baseline points="1872,477 1939,481 2006,480 2074,476 2141,471 2208,472 2276,474 2343,474 2410,474 2478,474 2545,474 2612,477 2680,480 2747,481 2814,480 2882,480 2949,480 3016,481 3084,483 3151,480 3219,474"/>
+                <TextEquiv>
+                    <Unicode>of Canterburys Library in St.</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="tr_1_tl_3" custom="readingOrder {index:2;}">
+                <Coords points="1848,654 2544,654 2635,600 2977,640 2957,484 2868,522 2713,480 2413,549 2014,532 1850,575"/>
+                <Baseline points="1860,600 1916,603 1972,603 2028,603 2084,603 2140,602 2196,600 2253,600 2309,600 2365,597 2421,597 2477,597 2533,597 2589,597 2646,597 2702,597 2758,597 2814,597 2870,597 2926,597 2983,594"/>
+                <TextEquiv>
+                    <Unicode>Martins in the Fields.</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="tr_1_tl_4" custom="readingOrder {index:3;}">
+                <Coords points="2192,812 2290,836 2366,821 2453,856 2522,812 2716,814 2740,804 2741,736 2522,741 2443,681 2362,735 2246,726 2192,750"/>
+                <Baseline points="2201,800 2228,798 2255,800 2282,800 2309,801 2336,803 2363,803 2391,803 2418,803 2445,802 2472,800 2499,800 2526,800 2553,800 2581,799 2608,797 2635,797 2662,797 2689,795 2716,795 2744,797"/>
+                <TextEquiv>
+                    <Unicode>18th.  Augt. 1710.</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="tr_1_tl_5" custom="readingOrder {index:4;}">
+                <Coords points="1938,1092 2061,1038 3176,1063 3176,976 3077,996 2991,955 2940,991 2465,942 1938,1019"/>
+                <Baseline points="1947,1051 2008,1056 2070,1049 2131,1040 2193,1033 2255,1033 2316,1033 2378,1033 2440,1033 2501,1033 2563,1034 2625,1036 2686,1033 2748,1034 2810,1036 2871,1033 2933,1034 2995,1036 3056,1036 3118,1040 3180,1045"/>
+                <TextEquiv>
+                    <Unicode>Present His Grace the Ld. A Bishop of</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="tr_1_tl_6" custom="readingOrder {index:5;}">
+                <Coords points="1988,1124 2561,1110 2725,1163 2804,1117 3225,1117 3164,1065 2716,1028 2669,1063 2327,1033 1988,1070"/>
+                <Baseline points="1998,1123 2059,1114 2121,1110 2182,1106 2244,1105 2305,1105 2367,1107 2428,1108 2490,1110 2551,1111 2613,1108 2674,1108 2736,1108 2797,1111 2859,1111 2920,1111 2982,1109 3043,1108 3105,1111 3166,1111 3228,1111"/>
+                <TextEquiv>
+                    <Unicode>Canterbury. the Ld. Bp. of Ely. Dr. Bradford.</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="tr_1_tl_7" custom="readingOrder {index:6;}">
+                <Coords points="1998,1208 3218,1220 3218,1112 2806,1117 2725,1163 2558,1112 2184,1109 1998,1166"/>
+                <Baseline points="2007,1200 2067,1194 2128,1192 2189,1188 2250,1188 2310,1186 2371,1185 2432,1186 2493,1188 2553,1188 2614,1188 2675,1188 2736,1185 2796,1186 2857,1188 2918,1188 2979,1188 3039,1185 3100,1188 3161,1190 3222,1194"/>
+                <TextEquiv>
+                    <Unicode>Mr La Mothe, Mr. Rival. Mr. Shute. Mr.</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="tr_1_tl_8" custom="readingOrder {index:7;}">
+                <Coords points="1985,1291 3124,1289 3222,1333 3249,1205 2603,1190 2467,1247 2202,1190 1983,1245"/>
+                <Baseline points="1995,1284 2058,1280 2121,1278 2184,1278 2247,1278 2310,1278 2373,1278 2436,1275 2499,1275 2562,1279 2625,1278 2688,1278 2751,1281 2814,1281 2877,1281 2940,1281 3003,1281 3066,1284 3129,1287 3192,1287 3255,1284"/>
+                <TextEquiv>
+                    <Unicode>Stubs. Dr. Woodward, Dr. Marshal, Dr. King</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="tr_1_tl_9" custom="readingOrder {index:8;}">
+                <Coords points="2007,1375 3212,1368 3193,1294 2819,1294 2770,1329 2699,1287 2317,1323 2007,1289"/>
+                <Baseline points="2016,1358 2076,1364 2136,1364 2196,1364 2256,1367 2316,1367 2376,1367 2436,1367 2496,1367 2556,1367 2616,1367 2676,1365 2736,1364 2796,1363 2856,1361 2916,1364 2976,1361 3036,1361 3096,1358 3156,1362 3216,1364"/>
+                <TextEquiv>
+                    <Unicode>Dr. Hancock. Mr. Baker, Sr. John Philips,</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="tr_1_tl_10" custom="readingOrder {index:9;}">
+                <Coords points="1992,1500 2315,1510 2396,1466 2777,1451 2927,1490 3085,1449 3281,1493 3281,1397 3178,1361 2645,1412 2514,1370 1992,1390"/>
+                <Baseline points="2001,1454 2065,1455 2129,1457 2193,1457 2257,1457 2322,1455 2386,1457 2450,1454 2514,1455 2578,1454 2643,1451 2707,1451 2771,1448 2835,1448 2899,1445 2964,1448 3028,1448 3092,1449 3156,1451 3220,1452 3285,1454"/>
+                <TextEquiv>
+                    <Unicode>Mr. Nelson, Mr. Bonet. Mr. Hodges Mr. Vernon</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="tr_1_tl_11" custom="readingOrder {index:10;}">
+                <Coords points="2165,1592 2504,1629 3009,1592 3107,1631 3269,1584 3247,1503 3085,1557 2915,1510 2698,1543 2618,1491 2351,1537 2271,1500 2167,1547"/>
+                <Baseline points="2174,1594 2231,1594 2289,1594 2347,1591 2405,1591 2463,1588 2521,1588 2578,1588 2636,1588 2694,1588 2752,1585 2810,1585 2868,1585 2925,1585 2983,1585 3041,1587 3099,1588 3157,1588 3215,1588 3273,1582"/>
+                <TextEquiv>
+                    <Unicode>1 The Secrey Reported that he had Recd. from</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="tr_1_tl_13" custom="readingOrder {index:11;}">
+                <Coords points="1971,1672 2268,1663 2334,1727 2472,1661 3259,1661 3260,1591 3111,1634 2689,1591 2519,1628 2386,1596 2300,1645 2160,1582 1971,1619"/>
+                <Baseline points="1980,1666 2044,1666 2108,1665 2172,1663 2236,1663 2300,1663 2364,1663 2428,1659 2492,1657 2556,1653 2620,1651 2684,1651 2748,1651 2812,1648 2876,1648 2940,1648 3004,1651 3068,1653 3132,1654 3196,1649 3261,1648"/>
+                <TextEquiv>
+                    <Unicode>Sr. Nathanl. Lloyd her Majties. Advocate General a</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="tr_1_tl_14" custom="readingOrder {index:12;}">
+                <Coords points="1958,1757 3259,1737 3260,1670 2952,1693 2753,1651 2340,1722 2180,1672 1960,1685"/>
+                <Baseline points="1968,1741 2032,1735 2097,1732 2162,1732 2227,1732 2292,1732 2356,1734 2421,1734 2486,1732 2551,1729 2616,1727 2680,1726 2745,1726 2810,1726 2875,1723 2940,1723 3004,1722 3069,1720 3134,1717 3199,1714 3264,1717"/>
+                <TextEquiv>
+                    <Unicode>Letter, giving an Accot: that Genl Codrington died</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="tr_1_tl_15" custom="readingOrder {index:13;}">
+                <Coords points="1977,1813 2378,1857 2501,1800 2603,1845 2730,1801 2989,1796 3055,1842 3272,1805 3272,1732 1977,1764"/>
+                <Baseline points="1986,1806 2050,1802 2115,1801 2179,1799 2244,1798 2308,1798 2373,1798 2437,1799 2502,1799 2566,1798 2631,1798 2695,1795 2760,1794 2824,1795 2889,1795 2953,1793 3018,1792 3082,1792 3147,1789 3211,1787 3276,1789"/>
+                <TextEquiv>
+                    <Unicode>on 7th. April last, &amp; had by his last Will &amp; Testament</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="tr_1_tl_16" custom="readingOrder {index:14;}">
+                <Coords points="1971,1891 2474,1879 2661,1919 2770,1870 3094,1867 3159,1909 3242,1865 3244,1793 3073,1847 2918,1796 2767,1838 2452,1811 2378,1857 1973,1811"/>
+                <Baseline points="1980,1875 2043,1878 2106,1878 2169,1875 2233,1875 2296,1873 2359,1875 2423,1875 2486,1875 2549,1873 2613,1872 2676,1871 2739,1867 2802,1866 2866,1866 2929,1866 2992,1866 3056,1864 3119,1863 3182,1860 3246,1860"/>
+                <TextEquiv>
+                    <Unicode>bearing date 22d. Febr. 1702/3 bequeathed some of</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="tr_1_tl_17" custom="readingOrder {index:15;}">
+                <Coords points="1983,1961 3262,1963 3239,1896 3092,1867 2561,1923 2474,1879 1983,1909"/>
+                <Baseline points="1992,1950 2055,1950 2119,1950 2183,1948 2247,1947 2310,1945 2374,1947 2438,1945 2502,1944 2565,1944 2629,1944 2693,1944 2757,1944 2820,1944 2884,1941 2948,1941 3012,1940 3075,1940 3139,1938 3203,1940 3267,1941"/>
+                <TextEquiv>
+                    <Unicode>his plantations therein Mentioned to this Society:</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="tr_1_tl_18" custom="readingOrder {index:16;}">
+                <Coords points="1980,2030 2182,2061 2435,2017 2713,2049 3267,2022 3228,1944 1980,1958"/>
+                <Baseline points="1989,2022 2053,2016 2117,2019 2181,2019 2245,2019 2309,2017 2373,2016 2437,2016 2501,2016 2565,2014 2629,2016 2693,2016 2757,2016 2821,2016 2885,2017 2949,2016 3013,2018 3077,2014 3141,2013 3205,2013 3270,2013"/>
+                <TextEquiv>
+                    <Unicode>then a Copy of the sd. Will of the sd. Genl. Codring</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="tr_1_tl_19" custom="readingOrder {index:17;}">
+                <Coords points="1977,2098 2421,2086 2679,2128 2816,2084 3257,2089 3257,2024 2713,2047 2448,2015 2197,2061 1977,2032"/>
+                <Baseline points="1986,2087 2049,2087 2113,2087 2177,2087 2241,2087 2304,2085 2368,2084 2432,2083 2496,2081 2559,2082 2623,2084 2687,2084 2751,2084 2814,2084 2878,2087 2942,2090 3006,2087 3069,2087 3133,2084 3197,2084 3261,2081"/>
+                <TextEquiv>
+                    <Unicode>-ton was produc'd and read: Agreed that Sr. Nathanl.</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="tr_1_tl_20" custom="readingOrder {index:18;}">
+                <Coords points="1961,2197 2120,2162 3262,2174 3262,2123 3146,2089 1961,2106"/>
+                <Baseline points="1971,2171 2035,2164 2100,2162 2165,2161 2230,2156 2295,2156 2359,2156 2424,2157 2489,2159 2554,2159 2619,2159 2683,2162 2748,2161 2813,2159 2878,2157 2943,2159 3007,2159 3072,2159 3137,2156 3202,2158 3267,2159"/>
+                <TextEquiv>
+                    <Unicode>Lloyd. Dr. Wood Dr. Paul and Dr. Penrill be re-</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="tr_1_tl_21" custom="readingOrder {index:19;}">
+                <Coords points="1992,2239 3254,2276 3235,2165 2494,2194 2197,2162 1992,2217"/>
+                <Baseline points="2001,2234 2063,2230 2126,2228 2189,2227 2252,2225 2315,2225 2378,2228 2440,2230 2503,2232 2566,2234 2629,2237 2692,2235 2755,2237 2818,2234 2880,2234 2943,2237 3006,2237 3069,2240 3132,2237 3195,2239 3258,2243"/>
+                <TextEquiv>
+                    <Unicode>taind as Council and Mr. Peirson as Proctor for</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="tr_1_tl_22" custom="readingOrder {index:20;}">
+                <Coords points="1992,2315 2255,2366 3148,2329 3148,2285 2885,2241 2817,2287 2452,2233 2354,2278 2143,2234 1992,2260"/>
+                <Baseline points="2001,2308 2058,2305 2116,2305 2173,2302 2231,2303 2288,2303 2346,2302 2403,2302 2461,2302 2518,2305 2576,2303 2633,2306 2691,2308 2748,2308 2806,2308 2863,2306 2921,2302 2978,2302 3036,2306 3093,2308 3151,2305"/>
+                <TextEquiv>
+                    <Unicode>the Society in the Cause of Genl. Codrington</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextEquiv>
+                <Unicode></Unicode>
+            </TextEquiv>
+        </TextRegion>
+    </Page>
+</PcGts>

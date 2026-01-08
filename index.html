@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Document Viewer (Multi-page, Line-level)</title>
+
+  <style>
+    body { margin: 0; font-family: system-ui, Arial, sans-serif; }
+
+    /* Happy-medium layout */
+    .wrap{
+      display: grid;
+      grid-template-columns: 3fr 2fr; /* ~60/40 */
+      gap: 16px;
+      padding: 16px;
+      align-items: start;
+    }
+
+    .panel{
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      padding: 12px;
+      background: #fff;
+    }
+
+    .topControls{
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      margin: 8px 0 10px 0;
+      font-size: 14px;
+    }
+
+    .topControls select{
+      padding: 6px 8px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      background: #fff;
+    }
+
+    .btn{
+      padding: 6px 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      background: #f7f7f7;
+      cursor: pointer;
+    }
+    .btn:disabled{
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .zoomRow{
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+    }
+    .zoomRow input[type="range"]{ width: 220px; }
+
+    /* Tall image area, scroll inside */
+    .imgBox{
+      position: relative;
+      width: 100%;
+      height: 85vh;
+      overflow: auto;
+      border-radius: 10px;
+    }
+
+    /* Image fits column by default */
+    .imgBox img{
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    .overlay{
+      position: absolute;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+    }
+
+    .imgBox img, .overlay { transform-origin: top left; }
+
+    .line{
+      padding: 6px 8px;
+      border-radius: 8px;
+      margin: 4px 0;
+      cursor: default;
+      line-height: 1.25;
+    }
+    .line:hover{ background: #f2f2f2; }
+    .line.active{ background: #ffeaa7; }
+
+    .hl{
+      fill: rgba(255, 234, 167, 0.35);
+      stroke: rgba(0,0,0,0.35);
+      stroke-width: 2;
+    }
+    .hl.active{
+      fill: rgba(255, 234, 167, 0.65);
+      stroke: rgba(0,0,0,0.6);
+    }
+
+    .hint{ color: #555; font-size: 14px; margin-top: 8px; }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="panel">
+      <h2 style="margin:0 0 6px 0;">Original</h2>
+
+      <div class="topControls">
+        <div>
+          Page:
+          <select id="pageSelect"></select>
+        </div>
+
+        <button class="btn" id="prevBtn">◀ Previous</button>
+        <button class="btn" id="nextBtn">Next ▶</button>
+
+        <div class="zoomRow" style="margin-left:auto;">
+          <div style="min-width:45px;">Zoom:</div>
+          <input id="zoom" type="range" min="1" max="2.0" step="0.05" value="1.15">
+          <div id="zoomVal" style="min-width:60px;">1.15×</div>
+        </div>
+      </div>
+
+      <div class="imgBox" id="imgBox">
+        <img id="pageImg" src="" alt="Document page" />
+        <svg class="overlay" id="svgOverlay"></svg>
+      </div>
+
+      <div class="hint">Hover a line on the right to highlight it here.</div>
+    </div>
+
+    <div class="panel">
+      <h2 style="margin:0 0 10px 0;">Transcription</h2>
+      <div id="lines"></div>
+      <div class="hint">Hover a highlighted region on the image to highlight the matching line here.</div>
+    </div>
+  </div>
+
+<script>
+(async function () {
+  /*
+    Your files:
+    p001.jpg + p001.xml
+    p002.jpg + p002.xml
+    p003.jpg + p003.xml
+  */
+  const PAGES = [
+    { label: "Page 1", image: "p001.jpg", xml: "p001.xml" },
+    { label: "Page 2", image: "p002.jpg", xml: "p002.xml" },
+    { label: "Page 3", image: "p003.jpg", xml: "p003.xml" }
+  ];
+
+  const img = document.getElementById("pageImg");
+  const svg = document.getElementById("svgOverlay");
+  const linesDiv = document.getElementById("lines");
+
+  const pageSelect = document.getElementById("pageSelect");
+  const prevBtn = document.getElementById("prevBtn");
+  const nextBtn = document.getElementById("nextBtn");
+
+  const zoom = document.getElementById("zoom");
+  const zoomVal = document.getElementById("zoomVal");
+
+  let currentIndex = 0;
+
+  function applyZoom(z){
+    img.style.transform = `scale(${z})`;
+    svg.style.transform = `scale(${z})`;
+    zoomVal.textContent = `${z}×`;
+    syncOverlayToImage();
+  }
+
+  function syncOverlayToImage(){
+    const z = parseFloat(zoom.value);
+    const rect = img.getBoundingClientRect();
+    const baseW = rect.width / z;
+    const baseH = rect.height / z;
+    svg.style.width = `${baseW}px`;
+    svg.style.height = `${baseH}px`;
+  }
+
+  function clearViewer(){
+    linesDiv.innerHTML = "";
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
+  }
+
+  function setButtons(){
+    prevBtn.disabled = currentIndex === 0;
+    nextBtn.disabled = currentIndex === PAGES.length - 1;
+  }
+
+  function setActive(id, on){
+    const lineEl = linesDiv.querySelector(`.line[data-id="${CSS.escape(id)}"]`);
+    const polyEl = svg.querySelector(`polygon[data-id="${CSS.escape(id)}"]`);
+    if (lineEl) lineEl.classList.toggle("active", on);
+    if (polyEl) polyEl.classList.toggle("active", on);
+  }
+
+  function wireHover(){
+    linesDiv.onmouseover = (e) => {
+      const line = e.target.closest(".line");
+      if (!line) return;
+      setActive(line.dataset.id, true);
+    };
+    linesDiv.onmouseout = (e) => {
+      const line = e.target.closest(".line");
+      if (!line) return;
+      setActive(line.dataset.id, false);
+    };
+
+    svg.onmouseover = (e) => {
+      const poly = e.target.closest("polygon[data-id]");
+      if (!poly) return;
+      setActive(poly.dataset.id, true);
+    };
+    svg.onmouseout = (e) => {
+      const poly = e.target.closest("polygon[data-id]");
+      if (!poly) return;
+      setActive(poly.dataset.id, false);
+    };
+  }
+
+  async function loadPage(index){
+    currentIndex = index;
+    pageSelect.value = String(index);
+    setButtons();
+
+    const { image, xml } = PAGES[index];
+
+    clearViewer();
+
+    // Load image
+    img.src = image;
+    if (!img.complete) {
+      await new Promise(res => img.addEventListener("load", res, { once: true }));
+    }
+
+    // Load PAGE XML
+    const xmlText = await fetch(xml).then(r => {
+      if (!r.ok) throw new Error(`Could not load ${xml} (HTTP ${r.status})`);
+      return r.text();
+    });
+
+    const doc = new DOMParser().parseFromString(xmlText, "application/xml");
+    const pageNode = doc.querySelector("PcGts > Page");
+    const imageW = parseFloat(pageNode.getAttribute("imageWidth"));
+    const imageH = parseFloat(pageNode.getAttribute("imageHeight"));
+
+    svg.setAttribute("viewBox", `0 0 ${imageW} ${imageH}`);
+    svg.setAttribute("preserveAspectRatio", "none");
+
+    const textLines = [...doc.querySelectorAll("TextLine")].map((tl, idx) => {
+      const id = tl.getAttribute("id") || `line_${idx+1}`;
+      const coords = tl.querySelector("Coords")?.getAttribute("points") || "";
+      const unicode = tl.querySelector("TextEquiv > Unicode")?.textContent?.trim() || "";
+      return { id, coords, unicode };
+    }).filter(x => x.coords && x.unicode);
+
+    for (const item of textLines) {
+      const div = document.createElement("div");
+      div.className = "line";
+      div.dataset.id = item.id;
+      div.textContent = item.unicode;
+      linesDiv.appendChild(div);
+    }
+
+    for (const item of textLines) {
+      const poly = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+      poly.setAttribute("points", item.coords);
+      poly.setAttribute("class", "hl");
+      poly.dataset.id = item.id;
+      poly.style.pointerEvents = "auto";
+      svg.appendChild(poly);
+    }
+
+    syncOverlayToImage();
+    applyZoom(zoom.value);
+    wireHover();
+  }
+
+  // Build dropdown
+  PAGES.forEach((p, i) => {
+    const opt = document.createElement("option");
+    opt.value = String(i);
+    opt.textContent = p.label;
+    pageSelect.appendChild(opt);
+  });
+
+  // Events
+  pageSelect.addEventListener("change", () => loadPage(parseInt(pageSelect.value, 10)));
+  prevBtn.addEventListener("click", () => loadPage(currentIndex - 1));
+  nextBtn.addEventListener("click", () => loadPage(currentIndex + 1));
+
+  zoom.addEventListener("input", () => applyZoom(zoom.value));
+  window.addEventListener("resize", () => {
+    syncOverlayToImage();
+    applyZoom(zoom.value);
+  });
+
+  // Start
+  setButtons();
+  await loadPage(0);
+})();
+</script>
+</body>
+</html>

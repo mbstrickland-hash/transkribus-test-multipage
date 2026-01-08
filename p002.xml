@@ -1,0 +1,289 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<PcGts xmlns="http://schema.primaresearch.org/PAGE/gts/pagecontent/2013-07-15" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://schema.primaresearch.org/PAGE/gts/pagecontent/2013-07-15 http://schema.primaresearch.org/PAGE/gts/pagecontent/2013-07-15/pagecontent.xsd">
+    <Metadata>
+        <Creator>prov=READ-COOP:name=TrHtr:version=2.33.0:model_id=356425:date=09_10_2025_01:19</Creator>
+        <Created>2025-10-08T14:33:23.451+02:00</Created>
+        <LastChange>2025-11-07T17:18:37.704+01:00</LastChange>
+        <TranskribusMetadata docId="11158241" pageId="104036509" pageNr="4" tsid="260407143" status="GT" userId="202909" imgUrl="https://files.transkribus.eu/Get?fileType=view&amp;id=JHSMFQTVDJZEXRXNGLPDEOBQ" xmlUrl="https://files.transkribus.eu/Get?id=GOUXXMIUVRORWYNIHWWSQAOF" imageId="87306570"/>
+    </Metadata>
+    <Page imageFilename="0004_p004.jpg" imageWidth="3508" imageHeight="2479">
+        <ReadingOrder>
+            <OrderedGroup id="ro_1767900469086" caption="Regions reading order">
+                <RegionRefIndexed index="0" regionRef="tr_1"/>
+                <RegionRefIndexed index="1" regionRef="tr_2"/>
+            </OrderedGroup>
+        </ReadingOrder>
+        <TextRegion orientation="0.0" id="tr_1" custom="readingOrder {index:0;}">
+            <Coords points="206,168 206,2457 1636,2457 1636,168"/>
+            <TextLine id="tr_1_tl_1" custom="readingOrder {index:0;}">
+                <Coords points="608,236 713,210 814,231 859,208 899,226 1250,220 1250,183 1171,133 942,133 903,101 846,98 729,144 610,135"/>
+                <Baseline points="618,215 649,212 681,209 713,209 745,205 777,202 808,200 840,200 872,200 904,200 936,200 967,200 999,199 1031,197 1063,197 1095,197 1126,197 1158,200 1190,202 1222,203 1254,203"/>
+                <TextEquiv>
+                    <Unicode>20. Octobr. 1710.</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="tr_1_tl_2" custom="readingOrder {index:1;}">
+                <Coords points="240,519 958,462 1536,517 1538,393 1267,356 981,407 755,356 421,450 242,427"/>
+                <Baseline points="250,477 314,477 379,474 443,471 508,468 572,468 637,468 701,463 766,465 830,462 895,462 960,462 1024,462 1089,459 1153,462 1218,464 1282,463 1347,465 1411,465 1476,463 1541,456"/>
+                <TextEquiv>
+                    <Unicode>Present. Dr. Butler. Mr. Stubs. Mr</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="tr_1_tl_3" custom="readingOrder {index:2;}">
+                <Coords points="414,553 640,610 955,549 1530,572 1561,492 1365,519 1164,464 1061,512 880,478 414,515"/>
+                <Baseline points="424,552 480,555 537,555 594,552 651,552 708,549 765,552 822,552 879,552 936,549 993,549 1049,549 1106,549 1163,549 1220,550 1277,552 1334,552 1391,552 1448,552 1505,552 1562,549"/>
+                <TextEquiv>
+                    <Unicode>Waddington, Mr. Shute. Dr. Woodward</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="tr_1_tl_4" custom="readingOrder {index:3;}">
+                <Coords points="396,661 1267,647 1580,683 1580,579 963,547 876,588 766,560 651,622 549,567 395,567"/>
+                <Baseline points="406,627 468,639 530,644 592,645 654,645 716,642 778,642 840,642 902,642 964,642 1026,639 1088,640 1150,642 1212,645 1274,648 1336,648 1398,651 1460,651 1522,654 1585,651"/>
+                <TextEquiv>
+                    <Unicode>Dr. Hancock, Mr. Baker Mr. Bonet. Sr. Jno.</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="tr_1_tl_5" custom="readingOrder {index:4;}">
+                <Coords points="419,766 759,732 873,782 944,732 1074,727 1315,731 1397,773 1534,734 1534,695 1262,647 958,675 841,643 688,700 578,654 419,681"/>
+                <Baseline points="430,728 485,724 540,723 596,725 651,725 707,725 762,725 817,727 873,725 928,728 984,725 1039,725 1094,725 1150,725 1205,725 1261,727 1316,726 1371,728 1427,727 1482,726 1538,728"/>
+                <TextEquiv>
+                    <Unicode>Phillips Mr. Tayleure, Mr. Hodges,</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="tr_1_tl_6" custom="readingOrder {index:5;}">
+                <Coords points="604,962 990,942 1081,981 1178,951 1317,997 1436,951 1580,963 1580,907 1372,841 1285,880 1162,844 1097,892 896,843 604,883"/>
+                <Baseline points="615,949 663,949 711,949 760,949 808,947 856,944 905,945 953,943 1001,943 1050,943 1098,945 1146,946 1195,946 1243,943 1291,946 1340,944 1388,946 1436,946 1485,946 1533,946 1582,949"/>
+                <TextEquiv>
+                    <Unicode>1 The Secrey. laid before the Board two</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="tr_1_tl_7" custom="readingOrder {index:6;}">
+                <Coords points="222,1082 393,1031 1545,1036 1546,958 1472,951 1315,997 990,944 841,1011 754,962 343,1003 224,960"/>
+                <Baseline points="232,1036 297,1033 363,1030 429,1027 495,1027 560,1027 626,1026 692,1027 758,1027 823,1027 889,1021 955,1019 1021,1018 1086,1018 1152,1018 1218,1020 1284,1021 1349,1019 1415,1018 1481,1018 1547,1018"/>
+                <TextEquiv>
+                    <Unicode>Papers sent him by Mr. Peirson the Society’s Syndic,</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="tr_1_tl_8" custom="readingOrder {index:7;}">
+                <Coords points="226,1122 327,1152 389,1107 1578,1114 1578,1031 1406,1065 1230,1020 962,1063 395,1033 226,1077"/>
+                <Baseline points="235,1111 302,1107 369,1102 437,1102 504,1099 571,1099 639,1096 706,1096 773,1096 841,1095 908,1093 975,1093 1043,1093 1110,1093 1177,1093 1245,1093 1312,1093 1379,1093 1447,1093 1514,1093 1582,1090"/>
+                <TextEquiv>
+                    <Unicode>the first containing the Minute of the Proceedings of</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="tr_1_tl_9" custom="readingOrder {index:8;}">
+                <Coords points="231,1212 713,1157 835,1191 1091,1157 1171,1194 1248,1154 1374,1194 1575,1155 1285,1095 233,1132"/>
+                <Baseline points="241,1176 307,1171 374,1170 441,1168 508,1164 575,1164 642,1161 709,1158 776,1158 843,1158 910,1158 976,1155 1043,1155 1110,1155 1177,1152 1244,1152 1311,1152 1378,1150 1445,1149 1512,1149 1579,1149"/>
+                <TextEquiv>
+                    <Unicode>the last prerogative Court relating to Genl. Codrington.</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="tr_1_tl_10" custom="readingOrder {index:9;}">
+                <Coords points="235,1251 1596,1232 1598,1146 1406,1193 1230,1155 1171,1194 1091,1157 860,1196 711,1155 236,1210"/>
+                <Baseline points="244,1233 315,1232 387,1233 458,1230 530,1230 601,1226 673,1223 744,1221 816,1220 887,1221 959,1220 1030,1218 1102,1218 1173,1218 1245,1221 1316,1219 1388,1219 1459,1219 1531,1217 1603,1212"/>
+                <TextEquiv>
+                    <Unicode>wch: was read; the other was the Book of Charges of the</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="tr_1_tl_11" custom="readingOrder {index:10;}">
+                <Coords points="240,1319 720,1282 1497,1308 1566,1294 1568,1219 240,1251"/>
+                <Baseline points="250,1287 316,1296 382,1292 448,1290 514,1287 580,1284 646,1283 712,1281 778,1281 844,1281 910,1281 976,1281 1042,1281 1108,1281 1174,1284 1240,1286 1306,1287 1372,1287 1438,1284 1504,1282 1571,1281"/>
+                <TextEquiv>
+                    <Unicode>sd. Mr Peirson amounting to £63: 10: 2. the half of</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="tr_1_tl_12" custom="readingOrder {index:11;}">
+                <Coords points="231,1374 1580,1378 1580,1331 1379,1290 882,1326 579,1287 231,1333"/>
+                <Baseline points="241,1364 308,1359 375,1358 442,1356 509,1355 576,1355 643,1355 710,1354 777,1352 844,1350 911,1350 978,1350 1045,1350 1112,1352 1179,1352 1246,1355 1313,1355 1380,1358 1447,1355 1514,1353 1582,1352"/>
+                <TextEquiv>
+                    <Unicode>which is to be allow'd by the parish of St. Brides,</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="tr_1_tl_14" custom="readingOrder {index:12;}">
+                <Coords points="224,1458 734,1427 962,1474 1543,1420 1506,1356 1394,1406 1081,1349 988,1394 226,1363"/>
+                <Baseline points="235,1442 300,1439 366,1437 431,1435 497,1430 563,1430 628,1427 694,1427 759,1426 825,1424 891,1424 956,1424 1022,1424 1087,1424 1153,1423 1218,1421 1284,1421 1350,1421 1415,1421 1481,1416 1547,1418"/>
+                <TextEquiv>
+                    <Unicode>Order’d that the Sd. Bill be refer'd to the Comee: who</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="tr_1_tl_15" custom="readingOrder {index:13;}">
+                <Coords points="235,1546 519,1514 595,1559 828,1498 1580,1522 1582,1443 235,1454"/>
+                <Baseline points="244,1514 311,1514 378,1511 445,1509 512,1508 579,1503 646,1502 713,1497 780,1496 847,1496 914,1496 981,1496 1048,1493 1115,1496 1182,1496 1249,1495 1316,1493 1383,1493 1450,1493 1517,1491 1585,1490"/>
+                <TextEquiv>
+                    <Unicode>if they are Satisfied in the several Items thereof.</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="tr_1_tl_16" custom="readingOrder {index:14;}">
+                <Coords points="228,1598 487,1634 558,1582 795,1578 908,1623 1020,1589 1632,1641 1632,1530 1561,1513 228,1546"/>
+                <Baseline points="238,1588 307,1582 377,1582 447,1581 517,1579 587,1578 657,1577 727,1574 797,1571 867,1571 937,1571 1006,1571 1076,1571 1146,1571 1216,1574 1286,1571 1356,1571 1426,1571 1496,1571 1566,1575 1636,1579"/>
+                <TextEquiv>
+                    <Unicode>shall have power to direct the Trear to discharge ye. same</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="tr_1_tl_18" custom="readingOrder {index:15;}">
+                <Coords points="587,1708 1223,1696 1314,1740 1390,1692 1557,1692 1557,1616 1399,1671 1292,1637 1155,1674 967,1607 588,1587"/>
+                <Baseline points="597,1696 645,1696 693,1696 741,1694 790,1693 838,1693 886,1693 934,1696 983,1696 1031,1696 1079,1696 1127,1695 1176,1694 1224,1695 1272,1693 1320,1693 1369,1693 1417,1691 1465,1693 1513,1690 1562,1687"/>
+                <TextEquiv>
+                    <Unicode>2 Agreed that a Select Comee. be appointed</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="tr_1_tl_19" custom="readingOrder {index:16;}">
+                <Coords points="219,1817 395,1765 1337,1779 1612,1756 1614,1706 1308,1738 1210,1694 800,1692 617,1733 439,1644 219,1719"/>
+                <Baseline points="229,1768 298,1766 367,1765 436,1760 506,1762 575,1762 644,1759 714,1759 783,1756 852,1756 922,1756 991,1756 1060,1753 1129,1753 1199,1756 1268,1756 1337,1754 1407,1753 1476,1753 1545,1750 1615,1747"/>
+                <TextEquiv>
+                    <Unicode>for takings care of the Society's Interest in the late be-</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="tr_1_tl_20" custom="readingOrder {index:17;}">
+                <Coords points="228,1868 546,1822 668,1866 926,1825 1003,1861 1250,1813 1488,1856 1616,1829 1616,1758 1040,1763 995,1799 841,1758 617,1797 396,1765 228,1809"/>
+                <Baseline points="238,1830 307,1826 376,1824 445,1824 514,1821 583,1821 652,1820 722,1818 791,1818 860,1818 929,1816 998,1818 1067,1815 1136,1817 1206,1815 1275,1812 1344,1812 1413,1809 1482,1809 1551,1811 1621,1809"/>
+                <TextEquiv>
+                    <Unicode>queathed Estate of Genl. Codringtons and for Ordering &amp;</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="tr_1_tl_21" custom="readingOrder {index:18;}">
+                <Coords points="224,1952 540,1945 636,1891 827,1897 919,1946 1193,1879 1273,1918 1452,1895 1454,1838 1239,1811 1042,1861 928,1825 793,1865 576,1831 226,1866"/>
+                <Baseline points="235,1902 296,1896 357,1893 418,1891 479,1890 540,1890 601,1890 662,1890 723,1888 784,1887 846,1887 907,1887 968,1887 1029,1884 1090,1882 1151,1878 1212,1878 1273,1875 1334,1872 1395,1872 1457,1875"/>
+                <TextEquiv>
+                    <Unicode>transacting all matters relating to the sd Estate.</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="tr_1_tl_22" custom="readingOrder {index:19;}">
+                <Coords points="599,2016 1088,2001 1175,2039 1223,2001 1418,2030 1566,2001 1568,1934 1465,1957 1399,1907 1298,1900 1164,1953 963,1929 823,1957 706,1920 601,1950"/>
+                <Baseline points="609,1995 657,1998 705,1998 753,2000 801,2001 849,2001 897,2001 945,2001 993,2001 1041,2001 1090,2000 1138,1997 1186,1995 1234,1995 1282,1997 1330,1998 1378,1998 1426,1998 1474,1995 1522,1990 1571,1986"/>
+                <TextEquiv>
+                    <Unicode>3 Agreed that his Grace the Ld. ABp of</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="tr_1_tl_23" custom="readingOrder {index:20;}">
+                <Coords points="226,2089 690,2060 899,2106 1134,2069 1186,2106 1442,2067 1529,2112 1607,2060 1607,1962 1506,2028 226,2012"/>
+                <Baseline points="235,2069 303,2061 372,2059 441,2057 510,2057 579,2057 648,2058 716,2060 785,2063 854,2060 923,2063 992,2063 1061,2065 1130,2066 1198,2066 1267,2067 1336,2069 1405,2069 1474,2066 1543,2060 1612,2054"/>
+                <TextEquiv>
+                    <Unicode>Canterbury, his Grace the Lord ABp of York, the Ld</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="tr_1_tl_24" custom="readingOrder {index:21;}">
+                <Coords points="226,2160 1031,2135 1356,2192 1619,2144 1605,2057 1529,2112 1440,2065 1242,2112 1134,2067 899,2108 674,2062 226,2089"/>
+                <Baseline points="235,2138 304,2133 373,2129 443,2126 512,2123 582,2123 651,2126 721,2126 790,2129 860,2129 929,2130 998,2132 1068,2135 1137,2132 1207,2135 1276,2136 1346,2138 1415,2139 1485,2141 1554,2140 1624,2135"/>
+                <TextEquiv>
+                    <Unicode>Bp. of London. and all other the Lds the Bishops that</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="tr_1_tl_25" custom="readingOrder {index:22;}">
+                <Coords points="226,2209 1605,2215 1580,2145 226,2163"/>
+                <Baseline points="235,2198 303,2196 372,2195 441,2192 509,2189 578,2192 647,2195 715,2195 784,2198 853,2198 922,2199 990,2201 1059,2201 1128,2201 1196,2201 1265,2201 1334,2200 1402,2201 1471,2203 1540,2204 1609,2201"/>
+                <TextEquiv>
+                    <Unicode>are Members of this Society, the Deans of Lincoln &amp;</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="tr_1_tl_26" custom="readingOrder {index:23;}">
+                <Coords points="226,2307 832,2266 1033,2320 1374,2325 1605,2286 1603,2218 1559,2208 1210,2202 1088,2241 1026,2202 224,2209"/>
+                <Baseline points="235,2269 303,2266 372,2262 441,2257 509,2258 578,2260 647,2263 715,2266 784,2266 853,2263 922,2268 990,2269 1059,2269 1128,2269 1196,2271 1265,2272 1334,2269 1402,2267 1471,2269 1540,2268 1609,2266"/>
+                <TextEquiv>
+                    <Unicode>Peterborough. Dr. Butler. Dr. Bradford. Dr. Linford</Unicode>
+                </TextEquiv>
+            </TextLine>
+        </TextRegion>
+        <TextRegion orientation="0.0" id="tr_2" custom="readingOrder {index:1;}">
+            <Coords points="1792,84 1792,1310 3219,1310 3219,84"/>
+            <TextLine id="tr_2_tl_1" custom="readingOrder {index:0;}">
+                <Coords points="1799,137 2048,185 2816,119 3079,164 3196,133 3198,60 3015,89 2856,34 2707,105 2618,59 1799,76"/>
+                <Baseline points="1809,131 1878,131 1948,140 2017,142 2087,143 2157,143 2226,141 2296,138 2365,136 2435,131 2505,128 2574,128 2644,123 2713,122 2783,122 2853,119 2922,117 2992,119 3061,119 3131,122 3201,122"/>
+                <TextEquiv>
+                    <Unicode>Sr. John Phillips Sr. Peter King. Mr. Melmouth Mr</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="tr_2_tl_2" custom="readingOrder {index:1;}">
+                <Coords points="1797,235 2039,213 2218,265 2330,210 2549,242 2773,197 2885,249 3212,196 3212,135 2051,183 1797,146"/>
+                <Baseline points="1806,203 1876,206 1947,208 2017,213 2088,215 2158,214 2229,212 2299,207 2370,206 2440,208 2511,205 2581,201 2652,199 2722,197 2793,197 2863,197 2934,200 3004,200 3075,200 3145,199 3216,194"/>
+                <TextEquiv>
+                    <Unicode>Edwards. Mr. Tayleure. Sr. Nathaniel Lloyd. Mr. Hodg</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="tr_2_tl_3" custom="readingOrder {index:2;}">
+                <Coords points="1783,300 2394,284 2531,331 2600,286 2894,274 3077,329 3144,283 3208,309 3208,199 2883,249 2645,204 2545,245 2330,210 2218,265 2037,213 1783,242"/>
+                <Baseline points="1792,271 1863,273 1934,280 2005,282 2076,283 2147,283 2218,283 2289,280 2360,279 2431,278 2502,277 2573,274 2644,271 2715,269 2786,268 2857,270 2928,271 2999,274 3070,275 3141,274 3213,271"/>
+                <TextEquiv>
+                    <Unicode>-es. Mr. Trimmer and Mr. Chamberlayne or any five</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="tr_2_tl_4" custom="readingOrder {index:3;}">
+                <Coords points="1804,405 2595,356 2716,414 2823,356 3024,396 3185,357 3185,292 3144,281 3063,331 2714,277 2547,331 2334,286 1806,318"/>
+                <Baseline points="1815,355 1883,357 1952,358 2021,358 2089,358 2158,355 2227,355 2295,355 2364,355 2433,355 2502,351 2570,349 2639,346 2708,346 2776,346 2845,346 2914,348 2982,349 3051,352 3120,355 3189,355"/>
+                <TextEquiv>
+                    <Unicode>of them be that Comee: to meet the first time At</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="tr_2_tl_5" custom="readingOrder {index:4;}">
+                <Coords points="1808,441 2190,446 2304,501 2547,435 2823,475 2988,441 3112,494 3185,460 3166,356 2986,412 2915,371 2704,409 2275,356 1808,407"/>
+                <Baseline points="1818,436 1886,439 1955,439 2023,439 2092,439 2160,438 2229,439 2297,437 2366,436 2434,436 2503,433 2572,433 2640,435 2709,433 2777,433 2846,433 2914,436 2983,439 3051,441 3120,442 3189,448"/>
+                <TextEquiv>
+                    <Unicode>Lambeth on Such day and how as his Grace the Ld</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="tr_2_tl_6" custom="readingOrder {index:5;}">
+                <Coords points="1811,555 3178,540 3178,478 2901,496 2785,444 2684,494 2561,443 2302,503 2135,444 2049,475 1929,446 1811,498"/>
+                <Baseline points="1821,522 1889,525 1957,525 2025,525 2093,522 2161,522 2229,522 2297,522 2365,522 2433,519 2502,519 2570,519 2638,519 2706,519 2774,521 2842,519 2910,522 2978,522 3046,523 3114,525 3183,534"/>
+                <TextEquiv>
+                    <Unicode>ABp shall appoint with power of Adjoining to</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="tr_2_tl_7" custom="readingOrder {index:6;}">
+                <Coords points="1820,606 2300,597 2409,643 2494,610 2714,652 2796,611 2929,647 3144,610 3144,544 2906,521 2832,567 2768,526 2645,571 2362,521 2314,556 1820,574"/>
+                <Baseline points="1830,600 1895,600 1961,600 2027,597 2093,596 2159,591 2225,591 2291,594 2357,594 2423,594 2489,594 2554,594 2620,594 2686,594 2752,594 2818,594 2884,594 2950,594 3016,597 3082,597 3148,582"/>
+                <TextEquiv>
+                    <Unicode>such other times and places as they the sd Comee.</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="tr_2_tl_8" custom="readingOrder {index:7;}">
+                <Coords points="1820,675 1904,681 1948,713 2025,690 2144,695 2179,722 2252,674 2327,672 2329,601 2215,617 2083,597 2014,627 1905,604 1849,651 1820,651"/>
+                <Baseline points="1830,677 1855,675 1880,675 1905,676 1930,677 1955,677 1980,677 2005,677 2030,676 2055,675 2081,674 2106,672 2131,670 2156,669 2181,669 2206,668 2231,667 2256,665 2281,663 2306,662 2332,660"/>
+                <TextEquiv>
+                    <Unicode>shall think fitt.</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="tr_2_tl_10" custom="readingOrder {index:8;}">
+                <Coords points="2012,917 2652,928 2899,889 3098,953 3196,930 3194,814 2849,871 2666,802 2257,848 2135,780 2010,860"/>
+                <Baseline points="2022,896 2084,893 2146,891 2208,890 2270,891 2332,890 2394,890 2456,888 2518,887 2580,890 2642,890 2704,893 2766,893 2828,893 2890,896 2952,896 3014,899 3076,898 3138,899 3201,896"/>
+                <TextEquiv>
+                    <Unicode>Ordd: that the Secrey. do wait on the Lord</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="tr_2_tl_11" custom="readingOrder {index:9;}">
+                <Coords points="1793,990 2177,1022 2293,979 3214,978 2896,892 2691,953 2568,905 2261,958 1793,908"/>
+                <Baseline points="1803,985 1873,988 1944,988 2015,985 2086,982 2157,982 2227,979 2298,978 2369,973 2440,973 2511,973 2581,973 2652,973 2723,976 2794,976 2865,979 2935,979 3006,979 3077,979 3148,979 3219,976"/>
+                <TextEquiv>
+                    <Unicode>ABp and acquaint his Grace with the abovemencond</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="tr_2_tl_12" custom="readingOrder {index:10;}">
+                <Coords points="1806,1081 2787,1065 2885,1104 3034,1058 3164,1086 3166,1011 1808,995"/>
+                <Baseline points="1815,1063 1882,1066 1950,1066 2017,1063 2085,1061 2153,1059 2220,1057 2288,1057 2356,1057 2423,1057 2491,1057 2559,1056 2626,1054 2694,1052 2762,1054 2829,1051 2897,1051 2965,1051 3032,1051 3100,1051 3168,1051"/>
+                <TextEquiv>
+                    <Unicode>Resolution of this Board, and pray his Grace to</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="tr_2_tl_13" custom="readingOrder {index:11;}">
+                <Coords points="1799,1161 2124,1148 2254,1191 2318,1143 3184,1143 3184,1090 2988,1113 2821,1068 1799,1086"/>
+                <Baseline points="1809,1146 1877,1141 1946,1142 2015,1140 2084,1137 2153,1137 2222,1137 2290,1137 2359,1137 2428,1140 2497,1140 2566,1140 2635,1137 2704,1138 2772,1138 2841,1137 2910,1137 2979,1137 3048,1137 3117,1137 3186,1137"/>
+                <TextEquiv>
+                    <Unicode>add such other persons as he shall think proper to</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="tr_2_tl_14" custom="readingOrder {index:12;}">
+                <Coords points="1815,1237 1941,1267 2033,1223 2455,1207 2968,1262 3191,1239 3171,1148 2945,1187 2872,1148 2620,1186 2409,1143 2254,1193 2124,1150 1815,1177"/>
+                <Baseline points="1824,1221 1892,1218 1961,1217 2029,1212 2098,1209 2166,1209 2235,1206 2303,1206 2372,1206 2440,1206 2509,1209 2578,1209 2646,1209 2715,1212 2783,1212 2852,1215 2920,1215 2989,1215 3057,1215 3126,1212 3195,1209"/>
+                <TextEquiv>
+                    <Unicode>the Comee: abovenamed &amp; to appoint the time for the</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="tr_2_tl_15" custom="readingOrder {index:13;}">
+                <Coords points="1808,1346 1881,1305 2030,1340 2193,1303 2233,1331 2300,1310 2353,1349 2554,1331 2554,1273 2364,1207 2188,1262 2115,1221 1946,1266 1898,1228 1808,1228"/>
+                <Baseline points="1818,1293 1855,1293 1892,1291 1929,1290 1966,1290 2003,1290 2040,1287 2077,1285 2114,1284 2151,1284 2188,1284 2225,1284 2262,1284 2299,1284 2336,1284 2373,1284 2410,1285 2447,1287 2484,1287 2521,1289 2559,1293"/>
+                <TextEquiv>
+                    <Unicode>first meetings of the Comee.</Unicode>
+                </TextEquiv>
+            </TextLine>
+        </TextRegion>
+    </Page>
+</PcGts>
