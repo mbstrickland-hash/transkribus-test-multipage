@@ -1,530 +1,253 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Document Viewer (Multi-page, Line-level)</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Document Viewer</title>
 
-  <style>
-    body { margin: 0; font-family: system-ui, Arial, sans-serif; }
+<style>
+body { margin: 0; font-family: system-ui, Arial, sans-serif; }
 
-    .wrap{
-      display: grid;
-      grid-template-columns: 3fr 2fr;
-      gap: 16px;
-      padding: 16px;
-      align-items: start;
-    }
+.wrap{
+  display: grid;
+  grid-template-columns: 3fr 2fr;
+  gap: 16px;
+  padding: 16px;
+}
 
-    /* Your preference */
-    .panel{
-      border: 1px solid #ddd;
-      border-radius: 10px;
-      padding: 12px;
-      background: #fff;
+.panel{
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 12px;
+  background: #fff;
+  height: 60vh;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
 
-      height: 60vh;
-      display: flex;
-      flex-direction: column;
-      min-height: 0;
-    }
+.topControls{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+  font-size: 14px;
+}
 
-    .topControls{
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 10px;
-      margin: 8px 0 10px 0;
-      font-size: 14px;
-      flex: 0 0 auto;
-    }
+select, .btn{
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  background: #f7f7f7;
+}
 
-    .topControls select{
-      padding: 6px 8px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      background: #fff;
-    }
+.btn:disabled{ opacity: 0.5; }
 
-    .btn{
-      padding: 6px 10px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      background: #f7f7f7;
-      cursor: pointer;
-      user-select: none;
-    }
-    .btn:disabled{
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
+.imgBox{
+  position: relative;
+  flex: 1;
+  overflow: auto;
+  border-radius: 10px;
+  cursor: grab;
+}
+.imgBox.dragging{ cursor: grabbing; }
 
-    .pill{
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 6px 10px;
-      border-radius: 999px;
-      border: 1px solid #ddd;
-      background: #fafafa;
-      font-size: 13px;
-      white-space: nowrap;
-    }
+img{
+  display: block;
+  width: 100%;
+  transform-origin: top left;
+}
 
-    .zoomRow{
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 14px;
-    }
-    .zoomRow input[type="range"]{ width: 220px; }
+.overlay{
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  transform-origin: top left;
+}
 
-    .imgBox{
-      position: relative;
-      width: 100%;
-      flex: 1 1 auto;
-      min-height: 0;
-      overflow: auto;
-      border-radius: 10px;
-      cursor: grab;
-      scroll-behavior: smooth;
-    }
-    .imgBox.dragging{ cursor: grabbing; }
+#linePane{
+  flex: 1;
+  overflow: auto;
+}
 
-    .imgBox img{
-      display: block;
-      width: 100%;
-      height: auto;
-      transform-origin: top left;
-    }
+.line{
+  padding: 6px 8px;
+  margin: 4px 0;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.line:hover{ background: #f2f2f2; }
+.line.active{ background: #ffeaa7; }
 
-    .overlay{
-      position: absolute;
-      top: 0;
-      left: 0;
-      pointer-events: none;
-      transform-origin: top left;
-    }
-
-    #lines{
-      flex: 1 1 auto;
-      min-height: 0;
-      overflow: auto;
-      padding-right: 8px;
-      scroll-behavior: smooth;
-    }
-
-    .line{
-      padding: 6px 8px;
-      border-radius: 8px;
-      margin: 4px 0;
-      cursor: default;
-      line-height: 1.25;
-    }
-    .line:hover{ background: #f2f2f2; }
-    .line.active{ background: #ffeaa7; }
-
-    .hl{
-      fill: rgba(255, 234, 167, 0.35);
-      stroke: rgba(0,0,0,0.35);
-      stroke-width: 2;
-    }
-    .hl.active{
-      fill: rgba(255, 234, 167, 0.65);
-      stroke: rgba(0,0,0,0.6);
-    }
-
-    .bottomTurner{
-      margin-top: 10px;
-      flex: 0 0 auto;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      padding: 8px 10px;
-      border: 1px solid #e6e6e6;
-      border-radius: 10px;
-      background: #fff;
-    }
-
-    .hint{ color: #555; font-size: 14px; margin-top: 8px; flex: 0 0 auto; }
-  </style>
+.hl{
+  fill: rgba(255,234,167,.35);
+  stroke: rgba(0,0,0,.35);
+  stroke-width: 2;
+}
+.hl.active{
+  fill: rgba(255,234,167,.65);
+  stroke: rgba(0,0,0,.6);
+}
+</style>
 </head>
 
 <body>
-  <div class="wrap">
-    <div class="panel">
-      <h2 style="margin:0 0 6px 0; flex:0 0 auto;">Original</h2>
+<div class="wrap">
 
-      <div class="topControls">
-        <div>
-          Page:
-          <select id="pageSelect"></select>
-        </div>
-
-        <button class="btn" id="prevBtn">◀ Previous</button>
-        <button class="btn" id="nextBtn">Next ▶</button>
-
-        <div class="pill" id="pageIndicatorTop">Page 1 of 1</div>
-
-        <div class="zoomRow" style="margin-left:auto;">
-          <div style="min-width:45px;">Zoom:</div>
-          <input id="zoom" type="range" min="1" max="2.5" step="0.05" value="1.25">
-          <div id="zoomVal" style="min-width:60px;">1.25×</div>
-        </div>
-      </div>
-
-      <div class="imgBox" id="imgBox">
-        <img id="pageImg" src="" alt="Document page" />
-        <svg class="overlay" id="svgOverlay"></svg>
-      </div>
-
-      <div class="bottomTurner">
-        <button class="btn" id="prevBtn2">◀ Previous</button>
-        <div class="pill" id="pageIndicatorBottom">Page 1 of 1</div>
-        <button class="btn" id="nextBtn2">Next ▶</button>
-      </div>
-
-      <div class="hint">Hover a line to jump the image to it; hover a highlight to jump the transcription.</div>
-    </div>
-
-    <div class="panel">
-      <h2 style="margin:0 0 10px 0; flex:0 0 auto;">Transcription</h2>
-      <div id="lines"></div>
-      <div class="hint">Mouse wheel zooms; click-and-drag pans; hover synchronizes both panes.</div>
-    </div>
+<div class="panel">
+  <div class="topControls">
+    Page:
+    <select id="pageSelect"></select>
+    <button class="btn" id="prev">◀</button>
+    <button class="btn" id="next">▶</button>
+    <span id="indicator"></span>
+    Zoom:
+    <input id="zoom" type="range" min="1" max="2.5" step="0.05" value="1.25">
   </div>
 
+  <div class="imgBox" id="imgBox">
+    <img id="img">
+    <svg class="overlay" id="svg"></svg>
+  </div>
+</div>
+
+<div class="panel">
+  <div id="linePane"></div>
+</div>
+
+</div>
+
 <script>
-(async function () {
-  const PAGES = [
-    { label: "Page 1", image: "p001.jpg", xml: "p001.xml" },
-    { label: "Page 2", image: "p002.jpg", xml: "p002.xml" },
-    { label: "Page 3", image: "p003.jpg", xml: "p003.xml" }
-  ];
+(async()=>{
+const PAGES=[
+ {label:"Page 1",image:"p001.jpg",xml:"p001.xml"},
+ {label:"Page 2",image:"p002.jpg",xml:"p002.xml"},
+ {label:"Page 3",image:"p003.jpg",xml:"p003.xml"}
+];
 
-  const imgBox = document.getElementById("imgBox");
-  const img = document.getElementById("pageImg");
-  const svg = document.getElementById("svgOverlay");
-  const linesDiv = document.getElementById("lines");
+const imgBox=imgBox=document.getElementById("imgBox");
+const img=document.getElementById("img");
+const svg=document.getElementById("svg");
+const lines=document.getElementById("linePane");
+const zoomInput=document.getElementById("zoom");
+const pageSelect=document.getElementById("pageSelect");
+const indicator=document.getElementById("indicator");
 
-  const pageSelect = document.getElementById("pageSelect");
-  const prevBtn = document.getElementById("prevBtn");
-  const nextBtn = document.getElementById("nextBtn");
-  const prevBtn2 = document.getElementById("prevBtn2");
-  const nextBtn2 = document.getElementById("nextBtn2");
+let zoom=parseFloat(zoomInput.value);
+let page=0;
+let imgW=1,imgH=1;
 
-  const pageIndicatorTop = document.getElementById("pageIndicatorTop");
-  const pageIndicatorBottom = document.getElementById("pageIndicatorBottom");
+/* ---------- zoom & pan ---------- */
+function applyZoom(z){
+ zoom=z;
+ img.style.transform=`scale(${z})`;
+ svg.style.transform=`scale(${z})`;
+}
+zoomInput.oninput=()=>applyZoom(+zoomInput.value);
 
-  const zoomInput = document.getElementById("zoom");
-  const zoomVal = document.getElementById("zoomVal");
+imgBox.addEventListener("wheel",e=>{
+ e.preventDefault();
+ applyZoom(Math.min(2.5,Math.max(1,zoom+(e.deltaY<0?.1:-.1))));
+},{passive:false});
 
-  let pageIndex = 0;
-  let zoom = parseFloat(zoomInput.value);
+let drag=false,sx,sy,sl,st;
+imgBox.onmousedown=e=>{
+ drag=true; sx=e.clientX; sy=e.clientY;
+ sl=imgBox.scrollLeft; st=imgBox.scrollTop;
+ imgBox.classList.add("dragging");
+};
+window.onmousemove=e=>{
+ if(!drag)return;
+ imgBox.scrollLeft=sl-(e.clientX-sx);
+ imgBox.scrollTop =st-(e.clientY-sy);
+};
+window.onmouseup=()=>{drag=false;imgBox.classList.remove("dragging");};
 
-  // For coordinate mapping
-  let currentImageW = 1;
-  let currentImageH = 1;
+/* ---------- helpers ---------- */
+function bbox(pts){
+ let xs=[],ys=[];
+ pts.split(" ").forEach(p=>{
+  let [x,y]=p.split(",").map(Number);
+  xs.push(x); ys.push(y);
+ });
+ return {
+  cx:(Math.min(...xs)+Math.max(...xs))/2,
+  cy:(Math.min(...ys)+Math.max(...ys))/2
+ };
+}
 
-  // Debounce / avoid jitter
-  let pendingJump = null;
-  let lastJumpId = null;
+function scrollImageTo(id){
+ const poly=svg.querySelector(`[data-id="${id}"]`);
+ if(!poly)return;
+ const b=bbox(poly.getAttribute("points"));
+ const scaleX=(img.clientWidth/zoom)/imgW;
+ const scaleY=(img.clientHeight/zoom)/imgH;
+ imgBox.scrollLeft=b.cx*scaleX*zoom-imgBox.clientWidth/2;
+ imgBox.scrollTop =b.cy*scaleY*zoom-imgBox.clientHeight/2;
+}
 
-  function setButtons(){
-    const atStart = pageIndex === 0;
-    const atEnd = pageIndex === PAGES.length - 1;
+function scrollTextTo(id){
+ const el=lines.querySelector(`[data-id="${id}"]`);
+ if(el) el.scrollIntoView({block:"center"});
+}
 
-    prevBtn.disabled = atStart;
-    prevBtn2.disabled = atStart;
+function setActive(id){
+ document.querySelectorAll(".active").forEach(x=>x.classList.remove("active"));
+ lines.querySelector(`[data-id="${id}"]`)?.classList.add("active");
+ svg.querySelector(`[data-id="${id}"]`)?.classList.add("active");
+}
 
-    nextBtn.disabled = atEnd;
-    nextBtn2.disabled = atEnd;
-  }
+/* ---------- load page ---------- */
+async function load(i){
+ page=Math.max(0,Math.min(PAGES.length-1,i));
+ pageSelect.value=page;
+ indicator.textContent=`Page ${page+1} of ${PAGES.length}`;
+ lines.innerHTML=""; svg.innerHTML="";
+ img.src=PAGES[page].image;
 
-  function setPageIndicator(){
-    const text = `Page ${pageIndex + 1} of ${PAGES.length}`;
-    pageIndicatorTop.textContent = text;
-    pageIndicatorBottom.textContent = text;
-  }
+ const xml=await fetch(PAGES[page].xml).then(r=>r.text());
+ const doc=new DOMParser().parseFromString(xml,"application/xml");
+ const pg=doc.querySelector("Page");
+ imgW=+pg.getAttribute("imageWidth");
+ imgH=+pg.getAttribute("imageHeight");
+ svg.setAttribute("viewBox",`0 0 ${imgW} ${imgH}`);
 
-  function syncOverlayToImage(){
-    const rect = img.getBoundingClientRect();
-    const baseW = rect.width / zoom;
-    const baseH = rect.height / zoom;
-    svg.style.width = `${baseW}px`;
-    svg.style.height = `${baseH}px`;
-  }
+ doc.querySelectorAll("TextLine").forEach(t=>{
+  const id=t.getAttribute("id");
+  const pts=t.querySelector("Coords")?.getAttribute("points");
+  const txt=t.querySelector("Unicode")?.textContent;
+  if(!pts||!txt)return;
 
-  function applyZoom(newZoom, centerX=null, centerY=null){
-    const oldZoom = zoom;
-    zoom = Math.min(parseFloat(zoomInput.max), Math.max(parseFloat(zoomInput.min), newZoom));
+  const div=document.createElement("div");
+  div.className="line";
+  div.dataset.id=id;
+  div.textContent=txt;
+  div.onclick=()=>{setActive(id);scrollImageTo(id);};
+  lines.appendChild(div);
 
-    zoomInput.value = zoom;
-    zoomVal.textContent = `${zoom.toFixed(2)}×`;
+  const poly=document.createElementNS("http://www.w3.org/2000/svg","polygon");
+  poly.setAttribute("points",pts);
+  poly.dataset.id=id;
+  poly.classList.add("hl");
+  poly.style.pointerEvents="auto";
+  poly.onclick=()=>{setActive(id);scrollTextTo(id);};
+  svg.appendChild(poly);
+ });
 
-    if (centerX !== null && centerY !== null) {
-      const dx = (centerX + imgBox.scrollLeft) / oldZoom;
-      const dy = (centerY + imgBox.scrollTop) / oldZoom;
+ applyZoom(zoom);
+}
 
-      img.style.transform = `scale(${zoom})`;
-      svg.style.transform = `scale(${zoom})`;
-
-      imgBox.scrollLeft = dx * zoom - centerX;
-      imgBox.scrollTop  = dy * zoom - centerY;
-    } else {
-      img.style.transform = `scale(${zoom})`;
-      svg.style.transform = `scale(${zoom})`;
-    }
-
-    syncOverlayToImage();
-  }
-
-  function clearViewer(){
-    linesDiv.innerHTML = "";
-    while (svg.firstChild) svg.removeChild(svg.firstChild);
-  }
-
-  function setActive(id, on){
-    const lineEl = linesDiv.querySelector(`.line[data-id="${CSS.escape(id)}"]`);
-    const polyEl = svg.querySelector(`polygon[data-id="${CSS.escape(id)}"]`);
-    if (lineEl) lineEl.classList.toggle("active", on);
-    if (polyEl) polyEl.classList.toggle("active", on);
-  }
-
-  function parsePoints(pointsStr){
-    // "x1,y1 x2,y2 ..." -> [{x,y},...]
-    return pointsStr.trim().split(/\s+/).map(p => {
-      const [x,y] = p.split(",").map(Number);
-      return { x, y };
-    }).filter(pt => Number.isFinite(pt.x) && Number.isFinite(pt.y));
-  }
-
-  function bboxFromPoints(pointsStr){
-    const pts = parsePoints(pointsStr);
-    if (!pts.length) return null;
-    let minX = pts[0].x, maxX = pts[0].x, minY = pts[0].y, maxY = pts[0].y;
-    for (const pt of pts) {
-      minX = Math.min(minX, pt.x);
-      maxX = Math.max(maxX, pt.x);
-      minY = Math.min(minY, pt.y);
-      maxY = Math.max(maxY, pt.y);
-    }
-    return { minX, minY, maxX, maxY, cx: (minX+maxX)/2, cy: (minY+maxY)/2 };
-  }
-
-  function jumpImageToLine(id){
-    const poly = svg.querySelector(`polygon[data-id="${CSS.escape(id)}"]`);
-    if (!poly) return;
-
-    const bbox = bboxFromPoints(poly.getAttribute("points"));
-    if (!bbox) return;
-
-    // Convert image coordinates -> base (unzoomed) pixel coordinates in the pane
-    const rect = img.getBoundingClientRect();
-    const baseW = rect.width / zoom;   // unzoomed displayed px width
-    const baseH = rect.height / zoom;  // unzoomed displayed px height
-    const scaleX = baseW / currentImageW;
-    const scaleY = baseH / currentImageH;
-
-    const targetX = bbox.cx * scaleX * zoom;
-    const targetY = bbox.cy * scaleY * zoom;
-
-    const desiredLeft = targetX - imgBox.clientWidth / 2;
-    const desiredTop  = targetY - imgBox.clientHeight / 2;
-
-    imgBox.scrollLeft = Math.max(0, desiredLeft);
-    imgBox.scrollTop  = Math.max(0, desiredTop);
-  }
-
-  function jumpTranscriptionToLine(id){
-    const lineEl = linesDiv.querySelector(`.line[data-id="${CSS.escape(id)}"]`);
-    if (!lineEl) return;
-    // Center in transcription pane
-    lineEl.scrollIntoView({ block: "center", inline: "nearest" });
-  }
-
-  function scheduleJump(kind, id){
-    // kind: "img" or "txt"
-    if (id === lastJumpId && pendingJump?.kind === kind) return;
-
-    if (pendingJump) clearTimeout(pendingJump.t);
-    pendingJump = {
-      kind,
-      id,
-      t: setTimeout(() => {
-        lastJumpId = id;
-        if (kind === "img") jumpImageToLine(id);
-        if (kind === "txt") jumpTranscriptionToLine(id);
-      }, 60) // small delay smooths “twitchiness”
-    };
-  }
-
-  function wireHover(){
-    linesDiv.onmouseover = (e) => {
-      const line = e.target.closest(".line");
-      if (!line) return;
-      const id = line.dataset.id;
-      setActive(id, true);
-      scheduleJump("img", id);   // NEW: hover transcription -> jump image
-    };
-    linesDiv.onmouseout = (e) => {
-      const line = e.target.closest(".line");
-      if (!line) return;
-      setActive(line.dataset.id, false);
-    };
-
-    svg.onmouseover = (e) => {
-      const poly = e.target.closest("polygon[data-id]");
-      if (!poly) return;
-      const id = poly.dataset.id;
-      setActive(id, true);
-      scheduleJump("txt", id);   // NEW: hover image -> jump transcription
-    };
-    svg.onmouseout = (e) => {
-      const poly = e.target.closest("polygon[data-id]");
-      if (!poly) return;
-      setActive(poly.dataset.id, false);
-    };
-  }
-
-  async function loadPage(i){
-    pageIndex = Math.max(0, Math.min(PAGES.length - 1, i));
-
-    pageSelect.value = String(pageIndex);
-    setButtons();
-    setPageIndicator();
-
-    const { image, xml } = PAGES[pageIndex];
-
-    clearViewer();
-
-    imgBox.scrollLeft = 0;
-    imgBox.scrollTop = 0;
-    lastJumpId = null;
-
-    img.src = image;
-    if (!img.complete) {
-      await new Promise(res => img.addEventListener("load", res, { once: true }));
-    }
-
-    const xmlText = await fetch(xml).then(r => {
-      if (!r.ok) throw new Error(`Could not load ${xml} (HTTP ${r.status})`);
-      return r.text();
-    });
-
-    const doc = new DOMParser().parseFromString(xmlText, "application/xml");
-    const pageNode = doc.querySelector("PcGts > Page") || doc.querySelector("Page");
-    currentImageW = parseFloat(pageNode.getAttribute("imageWidth")) || 1;
-    currentImageH = parseFloat(pageNode.getAttribute("imageHeight")) || 1;
-
-    svg.setAttribute("viewBox", `0 0 ${currentImageW} ${currentImageH}`);
-    svg.setAttribute("preserveAspectRatio", "none");
-
-    const textLines = [...doc.querySelectorAll("TextLine")].map((tl, idx) => {
-      const id = tl.getAttribute("id") || `line_${idx+1}`;
-      const coords = tl.querySelector("Coords")?.getAttribute("points") || "";
-      const unicode = tl.querySelector("TextEquiv > Unicode")?.textContent?.trim()
-                   || tl.querySelector("Unicode")?.textContent?.trim()
-                   || "";
-      return { id, coords, unicode };
-    }).filter(x => x.coords && x.unicode);
-
-    for (const item of textLines) {
-      const div = document.createElement("div");
-      div.className = "line";
-      div.dataset.id = item.id;
-      div.textContent = item.unicode;
-      linesDiv.appendChild(div);
-    }
-
-    for (const item of textLines) {
-      const poly = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
-      poly.setAttribute("points", item.coords);
-      poly.setAttribute("class", "hl");
-      poly.dataset.id = item.id;
-      poly.style.pointerEvents = "auto";
-      svg.appendChild(poly);
-    }
-
-    wireHover();
-    applyZoom(zoom);
-  }
-
-  // Build dropdown
-  PAGES.forEach((p, i) => {
-    const opt = document.createElement("option");
-    opt.value = String(i);
-    opt.textContent = p.label;
-    pageSelect.appendChild(opt);
-  });
-
-  // Navigation
-  pageSelect.addEventListener("change", () => loadPage(parseInt(pageSelect.value, 10)));
-  const goPrev = () => loadPage(pageIndex - 1);
-  const goNext = () => loadPage(pageIndex + 1);
-
-  prevBtn.addEventListener("click", goPrev);
-  nextBtn.addEventListener("click", goNext);
-  prevBtn2.addEventListener("click", goPrev);
-  nextBtn2.addEventListener("click", goNext);
-
-  // Slider zoom
-  zoomInput.addEventListener("input", () => applyZoom(parseFloat(zoomInput.value)));
-
-  // Mouse wheel zoom (centered on cursor)
-  imgBox.addEventListener("wheel", (e) => {
-    e.preventDefault();
-    const step = 0.10;
-    const delta = (e.deltaY < 0) ? step : -step;
-    applyZoom(zoom + delta, e.offsetX, e.offsetY);
-  }, { passive: false });
-
-  // Click-and-drag panning
-  let isDragging = false;
-  let startX = 0, startY = 0;
-  let startScrollLeft = 0, startScrollTop = 0;
-
-  imgBox.addEventListener("mousedown", (e) => {
-    if (e.button !== 0) return;
-    isDragging = true;
-    imgBox.classList.add("dragging");
-    startX = e.clientX;
-    startY = e.clientY;
-    startScrollLeft = imgBox.scrollLeft;
-    startScrollTop = imgBox.scrollTop;
-    e.preventDefault();
-  });
-
-  window.addEventListener("mousemove", (e) => {
-    if (!isDragging) return;
-    const dx = e.clientX - startX;
-    const dy = e.clientY - startY;
-    imgBox.scrollLeft = startScrollLeft - dx;
-    imgBox.scrollTop  = startScrollTop  - dy;
-  });
-
-  window.addEventListener("mouseup", () => {
-    if (!isDragging) return;
-    isDragging = false;
-    imgBox.classList.remove("dragging");
-  });
-
-  window.addEventListener("blur", () => {
-    if (!isDragging) return;
-    isDragging = false;
-    imgBox.classList.remove("dragging");
-  });
-
-  window.addEventListener("resize", () => {
-    syncOverlayToImage();
-    applyZoom(zoom);
-  });
-
-  // Start
-  setButtons();
-  setPageIndicator();
-  await loadPage(0);
+/* ---------- init ---------- */
+PAGES.forEach((p,i)=>{
+ const o=document.createElement("option");
+ o.value=i;o.textContent=p.label;
+ pageSelect.appendChild(o);
+});
+pageSelect.onchange=()=>load(+pageSelect.value);
+prev.onclick=()=>load(page-1);
+next.onclick=()=>load(page+1);
+await load(0);
 })();
 </script>
 </body>
