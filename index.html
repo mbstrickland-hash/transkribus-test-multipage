@@ -16,14 +16,14 @@
       align-items: start;
     }
 
-    /* Smaller panes so scrolling is required */
+    /* Your preference: smaller panes */
     .panel{
       border: 1px solid #ddd;
       border-radius: 10px;
       padding: 12px;
       background: #fff;
 
-      height: 50vh;
+      height: 60vh;              /* <- as requested */
       display: flex;
       flex-direction: column;
       min-height: 0;
@@ -52,10 +52,23 @@
       border: 1px solid #ccc;
       background: #f7f7f7;
       cursor: pointer;
+      user-select: none;
     }
     .btn:disabled{
       opacity: 0.5;
       cursor: not-allowed;
+    }
+
+    .pill{
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid #ddd;
+      background: #fafafa;
+      font-size: 13px;
+      white-space: nowrap;
     }
 
     .zoomRow{
@@ -66,7 +79,6 @@
     }
     .zoomRow input[type="range"]{ width: 220px; }
 
-    /* Image area scrolls inside the left panel */
     .imgBox{
       position: relative;
       width: 100%;
@@ -93,7 +105,6 @@
       transform-origin: top left;
     }
 
-    /* Transcription area scrolls inside the right panel */
     #lines{
       flex: 1 1 auto;
       min-height: 0;
@@ -121,6 +132,20 @@
       stroke: rgba(0,0,0,0.6);
     }
 
+    /* Persistent bottom page turner */
+    .bottomTurner{
+      margin-top: 10px;
+      flex: 0 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 8px 10px;
+      border: 1px solid #e6e6e6;
+      border-radius: 10px;
+      background: #fff;
+    }
+
     .hint{ color: #555; font-size: 14px; margin-top: 8px; flex: 0 0 auto; }
   </style>
 </head>
@@ -139,16 +164,27 @@
         <button class="btn" id="prevBtn">◀ Previous</button>
         <button class="btn" id="nextBtn">Next ▶</button>
 
+        <!-- Persistent page indicator (top) -->
+        <div class="pill" id="pageIndicatorTop">Page 1 of 1</div>
+
         <div class="zoomRow" style="margin-left:auto;">
           <div style="min-width:45px;">Zoom:</div>
-          <input id="zoom" type="range" min="1" max="2.5" step="0.05" value="1.35">
-          <div id="zoomVal" style="min-width:60px;">1.15×</div>
+          <!-- Your preference: default zoom 1.25 -->
+          <input id="zoom" type="range" min="1" max="2.5" step="0.05" value="1.25">
+          <div id="zoomVal" style="min-width:60px;">1.25×</div>
         </div>
       </div>
 
       <div class="imgBox" id="imgBox">
         <img id="pageImg" src="" alt="Document page" />
         <svg class="overlay" id="svgOverlay"></svg>
+      </div>
+
+      <!-- Persistent page turner (bottom) -->
+      <div class="bottomTurner">
+        <button class="btn" id="prevBtn2">◀ Previous</button>
+        <div class="pill" id="pageIndicatorBottom">Page 1 of 1</div>
+        <button class="btn" id="nextBtn2">Next ▶</button>
       </div>
 
       <div class="hint">Mouse wheel zooms. Click-and-drag pans. Hover highlights lines.</div>
@@ -178,6 +214,11 @@
   const pageSelect = document.getElementById("pageSelect");
   const prevBtn = document.getElementById("prevBtn");
   const nextBtn = document.getElementById("nextBtn");
+  const prevBtn2 = document.getElementById("prevBtn2");
+  const nextBtn2 = document.getElementById("nextBtn2");
+
+  const pageIndicatorTop = document.getElementById("pageIndicatorTop");
+  const pageIndicatorBottom = document.getElementById("pageIndicatorBottom");
 
   const zoomInput = document.getElementById("zoom");
   const zoomVal = document.getElementById("zoomVal");
@@ -186,16 +227,27 @@
   let zoom = parseFloat(zoomInput.value);
 
   function setButtons(){
-    prevBtn.disabled = pageIndex === 0;
-    nextBtn.disabled = pageIndex === PAGES.length - 1;
+    const atStart = pageIndex === 0;
+    const atEnd = pageIndex === PAGES.length - 1;
+
+    prevBtn.disabled = atStart;
+    prevBtn2.disabled = atStart;
+
+    nextBtn.disabled = atEnd;
+    nextBtn2.disabled = atEnd;
+  }
+
+  function setPageIndicator(){
+    const text = `Page ${pageIndex + 1} of ${PAGES.length}`;
+    pageIndicatorTop.textContent = text;
+    pageIndicatorBottom.textContent = text;
   }
 
   function syncOverlayToImage(){
     // Keep overlay aligned with the rendered image size (pre-transform)
-    const z = zoom;
     const rect = img.getBoundingClientRect();
-    const baseW = rect.width / z;
-    const baseH = rect.height / z;
+    const baseW = rect.width / zoom;
+    const baseH = rect.height / zoom;
     svg.style.width = `${baseW}px`;
     svg.style.height = `${baseH}px`;
   }
@@ -207,7 +259,7 @@
     zoomInput.value = zoom;
     zoomVal.textContent = `${zoom.toFixed(2)}×`;
 
-    // If mouse-centered zoom requested, preserve the point under cursor
+    // Mouse-centered zoom keeps point under cursor stable
     if (centerX !== null && centerY !== null) {
       const dx = (centerX + imgBox.scrollLeft) / oldZoom;
       const dy = (centerY + imgBox.scrollTop) / oldZoom;
@@ -215,7 +267,6 @@
       img.style.transform = `scale(${zoom})`;
       svg.style.transform = `scale(${zoom})`;
 
-      // After transform, re-scroll so cursor stays over same image location
       imgBox.scrollLeft = dx * zoom - centerX;
       imgBox.scrollTop  = dy * zoom - centerY;
     } else {
@@ -263,29 +314,25 @@
   }
 
   async function loadPage(i){
-    // Clamp and set as source of truth
     pageIndex = Math.max(0, Math.min(PAGES.length - 1, i));
 
-    // ✅ FIX: keep dropdown synced no matter how we navigated here
+    // Sync dropdown + indicators regardless of how navigation happened
     pageSelect.value = String(pageIndex);
-
     setButtons();
+    setPageIndicator();
 
     const { image, xml } = PAGES[pageIndex];
 
     clearViewer();
 
-    // Reset scroll position when switching pages (optional, feels clean)
     imgBox.scrollLeft = 0;
     imgBox.scrollTop = 0;
 
-    // Load image
     img.src = image;
     if (!img.complete) {
       await new Promise(res => img.addEventListener("load", res, { once: true }));
     }
 
-    // Load PAGE XML
     const xmlText = await fetch(xml).then(r => {
       if (!r.ok) throw new Error(`Could not load ${xml} (HTTP ${r.status})`);
       return r.text();
@@ -308,7 +355,6 @@
       return { id, coords, unicode };
     }).filter(x => x.coords && x.unicode);
 
-    // Render transcription + polygons
     for (const item of textLines) {
       const div = document.createElement("div");
       div.className = "line";
@@ -327,12 +373,10 @@
     }
 
     wireHover();
-
-    // Ensure current zoom applied after new content loads
     applyZoom(zoom);
   }
 
-  // Build dropdown options
+  // Build dropdown
   PAGES.forEach((p, i) => {
     const opt = document.createElement("option");
     opt.value = String(i);
@@ -340,28 +384,25 @@
     pageSelect.appendChild(opt);
   });
 
-  // Dropdown navigation
-  pageSelect.addEventListener("change", () => {
-    loadPage(parseInt(pageSelect.value, 10));
-  });
+  // Navigation events (top + bottom)
+  pageSelect.addEventListener("change", () => loadPage(parseInt(pageSelect.value, 10)));
 
-  // Arrow navigation
-  prevBtn.addEventListener("click", () => loadPage(pageIndex - 1));
-  nextBtn.addEventListener("click", () => loadPage(pageIndex + 1));
+  const goPrev = () => loadPage(pageIndex - 1);
+  const goNext = () => loadPage(pageIndex + 1);
+
+  prevBtn.addEventListener("click", goPrev);
+  nextBtn.addEventListener("click", goNext);
+  prevBtn2.addEventListener("click", goPrev);
+  nextBtn2.addEventListener("click", goNext);
 
   // Slider zoom
   zoomInput.addEventListener("input", () => applyZoom(parseFloat(zoomInput.value)));
 
   // Mouse wheel zoom (centered on cursor)
   imgBox.addEventListener("wheel", (e) => {
-    // Prevent page scroll while interacting with the image pane
     e.preventDefault();
-
-    // Natural wheel: up = zoom in, down = zoom out
     const step = 0.10;
     const delta = (e.deltaY < 0) ? step : -step;
-
-    // offsetX/Y are relative to the imgBox, which is what we want
     applyZoom(zoom + delta, e.offsetX, e.offsetY);
   }, { passive: false });
 
@@ -371,7 +412,7 @@
   let startScrollLeft = 0, startScrollTop = 0;
 
   imgBox.addEventListener("mousedown", (e) => {
-    if (e.button !== 0) return; // left button only
+    if (e.button !== 0) return;
     isDragging = true;
     imgBox.classList.add("dragging");
     startX = e.clientX;
@@ -401,7 +442,6 @@
     imgBox.classList.remove("dragging");
   });
 
-  // Keep overlay aligned if the window resizes
   window.addEventListener("resize", () => {
     syncOverlayToImage();
     applyZoom(zoom);
@@ -409,10 +449,9 @@
 
   // Start
   setButtons();
+  setPageIndicator();
   await loadPage(0);
 })();
 </script>
 </body>
 </html>
-
-
