@@ -16,14 +16,14 @@
       align-items: start;
     }
 
-    /* Your preference: smaller panes */
+    /* Your preference */
     .panel{
       border: 1px solid #ddd;
       border-radius: 10px;
       padding: 12px;
       background: #fff;
 
-      height: 60vh;              /* <- as requested */
+      height: 60vh;
       display: flex;
       flex-direction: column;
       min-height: 0;
@@ -87,6 +87,7 @@
       overflow: auto;
       border-radius: 10px;
       cursor: grab;
+      scroll-behavior: smooth;
     }
     .imgBox.dragging{ cursor: grabbing; }
 
@@ -101,7 +102,7 @@
       position: absolute;
       top: 0;
       left: 0;
-      pointer-events: none; /* enabled per polygon */
+      pointer-events: none;
       transform-origin: top left;
     }
 
@@ -110,6 +111,7 @@
       min-height: 0;
       overflow: auto;
       padding-right: 8px;
+      scroll-behavior: smooth;
     }
 
     .line{
@@ -132,7 +134,6 @@
       stroke: rgba(0,0,0,0.6);
     }
 
-    /* Persistent bottom page turner */
     .bottomTurner{
       margin-top: 10px;
       flex: 0 0 auto;
@@ -164,12 +165,10 @@
         <button class="btn" id="prevBtn">◀ Previous</button>
         <button class="btn" id="nextBtn">Next ▶</button>
 
-        <!-- Persistent page indicator (top) -->
         <div class="pill" id="pageIndicatorTop">Page 1 of 1</div>
 
         <div class="zoomRow" style="margin-left:auto;">
           <div style="min-width:45px;">Zoom:</div>
-          <!-- Your preference: default zoom 1.25 -->
           <input id="zoom" type="range" min="1" max="2.5" step="0.05" value="1.25">
           <div id="zoomVal" style="min-width:60px;">1.25×</div>
         </div>
@@ -180,26 +179,24 @@
         <svg class="overlay" id="svgOverlay"></svg>
       </div>
 
-      <!-- Persistent page turner (bottom) -->
       <div class="bottomTurner">
         <button class="btn" id="prevBtn2">◀ Previous</button>
         <div class="pill" id="pageIndicatorBottom">Page 1 of 1</div>
         <button class="btn" id="nextBtn2">Next ▶</button>
       </div>
 
-      <div class="hint">Mouse wheel zooms. Click-and-drag pans. Hover highlights lines.</div>
+      <div class="hint">Hover a line to jump the image to it; hover a highlight to jump the transcription.</div>
     </div>
 
     <div class="panel">
       <h2 style="margin:0 0 10px 0; flex:0 0 auto;">Transcription</h2>
       <div id="lines"></div>
-      <div class="hint">Hover a highlighted region on the image to highlight the matching line here.</div>
+      <div class="hint">Mouse wheel zooms; click-and-drag pans; hover synchronizes both panes.</div>
     </div>
   </div>
 
 <script>
 (async function () {
-  // Files must exist in repo root:
   const PAGES = [
     { label: "Page 1", image: "p001.jpg", xml: "p001.xml" },
     { label: "Page 2", image: "p002.jpg", xml: "p002.xml" },
@@ -226,6 +223,14 @@
   let pageIndex = 0;
   let zoom = parseFloat(zoomInput.value);
 
+  // For coordinate mapping
+  let currentImageW = 1;
+  let currentImageH = 1;
+
+  // Debounce / avoid jitter
+  let pendingJump = null;
+  let lastJumpId = null;
+
   function setButtons(){
     const atStart = pageIndex === 0;
     const atEnd = pageIndex === PAGES.length - 1;
@@ -244,7 +249,6 @@
   }
 
   function syncOverlayToImage(){
-    // Keep overlay aligned with the rendered image size (pre-transform)
     const rect = img.getBoundingClientRect();
     const baseW = rect.width / zoom;
     const baseH = rect.height / zoom;
@@ -259,7 +263,6 @@
     zoomInput.value = zoom;
     zoomVal.textContent = `${zoom.toFixed(2)}×`;
 
-    // Mouse-centered zoom keeps point under cursor stable
     if (centerX !== null && centerY !== null) {
       const dx = (centerX + imgBox.scrollLeft) / oldZoom;
       const dy = (centerY + imgBox.scrollTop) / oldZoom;
@@ -289,11 +292,81 @@
     if (polyEl) polyEl.classList.toggle("active", on);
   }
 
+  function parsePoints(pointsStr){
+    // "x1,y1 x2,y2 ..." -> [{x,y},...]
+    return pointsStr.trim().split(/\s+/).map(p => {
+      const [x,y] = p.split(",").map(Number);
+      return { x, y };
+    }).filter(pt => Number.isFinite(pt.x) && Number.isFinite(pt.y));
+  }
+
+  function bboxFromPoints(pointsStr){
+    const pts = parsePoints(pointsStr);
+    if (!pts.length) return null;
+    let minX = pts[0].x, maxX = pts[0].x, minY = pts[0].y, maxY = pts[0].y;
+    for (const pt of pts) {
+      minX = Math.min(minX, pt.x);
+      maxX = Math.max(maxX, pt.x);
+      minY = Math.min(minY, pt.y);
+      maxY = Math.max(maxY, pt.y);
+    }
+    return { minX, minY, maxX, maxY, cx: (minX+maxX)/2, cy: (minY+maxY)/2 };
+  }
+
+  function jumpImageToLine(id){
+    const poly = svg.querySelector(`polygon[data-id="${CSS.escape(id)}"]`);
+    if (!poly) return;
+
+    const bbox = bboxFromPoints(poly.getAttribute("points"));
+    if (!bbox) return;
+
+    // Convert image coordinates -> base (unzoomed) pixel coordinates in the pane
+    const rect = img.getBoundingClientRect();
+    const baseW = rect.width / zoom;   // unzoomed displayed px width
+    const baseH = rect.height / zoom;  // unzoomed displayed px height
+    const scaleX = baseW / currentImageW;
+    const scaleY = baseH / currentImageH;
+
+    const targetX = bbox.cx * scaleX * zoom;
+    const targetY = bbox.cy * scaleY * zoom;
+
+    const desiredLeft = targetX - imgBox.clientWidth / 2;
+    const desiredTop  = targetY - imgBox.clientHeight / 2;
+
+    imgBox.scrollLeft = Math.max(0, desiredLeft);
+    imgBox.scrollTop  = Math.max(0, desiredTop);
+  }
+
+  function jumpTranscriptionToLine(id){
+    const lineEl = linesDiv.querySelector(`.line[data-id="${CSS.escape(id)}"]`);
+    if (!lineEl) return;
+    // Center in transcription pane
+    lineEl.scrollIntoView({ block: "center", inline: "nearest" });
+  }
+
+  function scheduleJump(kind, id){
+    // kind: "img" or "txt"
+    if (id === lastJumpId && pendingJump?.kind === kind) return;
+
+    if (pendingJump) clearTimeout(pendingJump.t);
+    pendingJump = {
+      kind,
+      id,
+      t: setTimeout(() => {
+        lastJumpId = id;
+        if (kind === "img") jumpImageToLine(id);
+        if (kind === "txt") jumpTranscriptionToLine(id);
+      }, 60) // small delay smooths “twitchiness”
+    };
+  }
+
   function wireHover(){
     linesDiv.onmouseover = (e) => {
       const line = e.target.closest(".line");
       if (!line) return;
-      setActive(line.dataset.id, true);
+      const id = line.dataset.id;
+      setActive(id, true);
+      scheduleJump("img", id);   // NEW: hover transcription -> jump image
     };
     linesDiv.onmouseout = (e) => {
       const line = e.target.closest(".line");
@@ -304,7 +377,9 @@
     svg.onmouseover = (e) => {
       const poly = e.target.closest("polygon[data-id]");
       if (!poly) return;
-      setActive(poly.dataset.id, true);
+      const id = poly.dataset.id;
+      setActive(id, true);
+      scheduleJump("txt", id);   // NEW: hover image -> jump transcription
     };
     svg.onmouseout = (e) => {
       const poly = e.target.closest("polygon[data-id]");
@@ -316,7 +391,6 @@
   async function loadPage(i){
     pageIndex = Math.max(0, Math.min(PAGES.length - 1, i));
 
-    // Sync dropdown + indicators regardless of how navigation happened
     pageSelect.value = String(pageIndex);
     setButtons();
     setPageIndicator();
@@ -327,6 +401,7 @@
 
     imgBox.scrollLeft = 0;
     imgBox.scrollTop = 0;
+    lastJumpId = null;
 
     img.src = image;
     if (!img.complete) {
@@ -340,10 +415,10 @@
 
     const doc = new DOMParser().parseFromString(xmlText, "application/xml");
     const pageNode = doc.querySelector("PcGts > Page") || doc.querySelector("Page");
-    const imageW = parseFloat(pageNode.getAttribute("imageWidth"));
-    const imageH = parseFloat(pageNode.getAttribute("imageHeight"));
+    currentImageW = parseFloat(pageNode.getAttribute("imageWidth")) || 1;
+    currentImageH = parseFloat(pageNode.getAttribute("imageHeight")) || 1;
 
-    svg.setAttribute("viewBox", `0 0 ${imageW} ${imageH}`);
+    svg.setAttribute("viewBox", `0 0 ${currentImageW} ${currentImageH}`);
     svg.setAttribute("preserveAspectRatio", "none");
 
     const textLines = [...doc.querySelectorAll("TextLine")].map((tl, idx) => {
@@ -384,9 +459,8 @@
     pageSelect.appendChild(opt);
   });
 
-  // Navigation events (top + bottom)
+  // Navigation
   pageSelect.addEventListener("change", () => loadPage(parseInt(pageSelect.value, 10)));
-
   const goPrev = () => loadPage(pageIndex - 1);
   const goNext = () => loadPage(pageIndex + 1);
 
