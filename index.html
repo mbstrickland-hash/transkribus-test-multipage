@@ -23,7 +23,7 @@
       padding: 12px;
       background: #fff;
 
-      height: 70vh;              /* <- smaller than before */
+      height: 70vh;              /* smaller than before */
       display: flex;
       flex-direction: column;
       min-height: 0;             /* critical for scroll children */
@@ -74,7 +74,11 @@
       min-height: 0;
       overflow: auto;
       border-radius: 10px;
+
+      /* NEW: grab-to-pan cursor */
+      cursor: grab;
     }
+    .imgBox.dragging{ cursor: grabbing; }
 
     .imgBox img{
       display: block;
@@ -149,7 +153,7 @@
         <svg class="overlay" id="svgOverlay"></svg>
       </div>
 
-      <div class="hint">Hover a line on the right to highlight it here.</div>
+      <div class="hint">Click and drag (hold left mouse button) to move the image when zoomed in.</div>
     </div>
 
     <div class="panel">
@@ -168,6 +172,7 @@
     { label: "Page 3", image: "p003.jpg", xml: "p003.xml" }
   ];
 
+  const imgBox = document.getElementById("imgBox");
   const img = document.getElementById("pageImg");
   const svg = document.getElementById("svgOverlay");
   const linesDiv = document.getElementById("lines");
@@ -196,6 +201,48 @@
     svg.style.width = `${baseW}px`;
     svg.style.height = `${baseH}px`;
   }
+
+  /* NEW: Click-and-drag panning inside the image pane */
+  let isDragging = false;
+  let startX = 0, startY = 0;
+  let startScrollLeft = 0, startScrollTop = 0;
+
+  imgBox.addEventListener("mousedown", (e) => {
+    if (e.button !== 0) return; // left mouse button only
+
+    // avoid starting a drag if clicking on UI controls (defensive)
+    if (e.target.closest("select, button, input, a, label")) return;
+
+    isDragging = true;
+    imgBox.classList.add("dragging");
+
+    startX = e.clientX;
+    startY = e.clientY;
+    startScrollLeft = imgBox.scrollLeft;
+    startScrollTop = imgBox.scrollTop;
+
+    e.preventDefault(); // prevent text selection
+  });
+
+  window.addEventListener("mousemove", (e) => {
+    if (!isDragging) return;
+    const dx = e.clientX - startX;
+    const dy = e.clientY - startY;
+    imgBox.scrollLeft = startScrollLeft - dx;
+    imgBox.scrollTop  = startScrollTop  - dy;
+  });
+
+  window.addEventListener("mouseup", () => {
+    if (!isDragging) return;
+    isDragging = false;
+    imgBox.classList.remove("dragging");
+  });
+
+  window.addEventListener("blur", () => {
+    if (!isDragging) return;
+    isDragging = false;
+    imgBox.classList.remove("dragging");
+  });
 
   function clearViewer(){
     linesDiv.innerHTML = "";
@@ -246,6 +293,10 @@
     const { image, xml } = PAGES[index];
 
     clearViewer();
+
+    // Reset scroll positions when switching pages (optional but feels cleaner)
+    imgBox.scrollLeft = 0;
+    imgBox.scrollTop = 0;
 
     img.src = image;
     if (!img.complete) {
