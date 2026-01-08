@@ -8,7 +8,7 @@
   <style>
     body { margin: 0; font-family: system-ui, Arial, sans-serif; }
 
-    /* Happy-medium layout */
+    /* Layout */
     .wrap{
       display: grid;
       grid-template-columns: 3fr 2fr; /* ~60/40 */
@@ -17,11 +17,17 @@
       align-items: start;
     }
 
+    /* Panels become fixed-height columns with their own internal scrolling regions */
     .panel{
       border: 1px solid #ddd;
       border-radius: 10px;
       padding: 12px;
       background: #fff;
+
+      height: 90vh;              /* key: equal panel heights */
+      display: flex;             /* key: allow internal regions to flex */
+      flex-direction: column;
+      min-height: 0;             /* key: enables child overflow scrolling properly */
     }
 
     .topControls{
@@ -31,6 +37,7 @@
       gap: 10px;
       margin: 8px 0 10px 0;
       font-size: 14px;
+      flex: 0 0 auto;            /* key: controls do not shrink */
     }
 
     .topControls select{
@@ -60,16 +67,17 @@
     }
     .zoomRow input[type="range"]{ width: 220px; }
 
-    /* Tall image area, scroll inside */
+    /* Image area scrolls inside the left panel */
     .imgBox{
       position: relative;
       width: 100%;
-      height: 85vh;
-      overflow: auto;
+      flex: 1 1 auto;            /* key: fills remaining panel height */
+      min-height: 0;             /* key: enables internal scrolling */
+      overflow: auto;            /* key: image pane scrollbar */
       border-radius: 10px;
     }
 
-    /* Image fits column by default */
+    /* Image fits column width by default */
     .imgBox img{
       display: block;
       width: 100%;
@@ -84,6 +92,14 @@
     }
 
     .imgBox img, .overlay { transform-origin: top left; }
+
+    /* Transcription area scrolls inside the right panel */
+    #lines{
+      flex: 1 1 auto;            /* key: fills remaining panel height */
+      min-height: 0;             /* key: enables internal scrolling */
+      overflow: auto;            /* key: transcription scrollbar */
+      padding-right: 8px;        /* prevents scrollbar overlap */
+    }
 
     .line{
       padding: 6px 8px;
@@ -105,14 +121,14 @@
       stroke: rgba(0,0,0,0.6);
     }
 
-    .hint{ color: #555; font-size: 14px; margin-top: 8px; }
+    .hint{ color: #555; font-size: 14px; margin-top: 8px; flex: 0 0 auto; }
   </style>
 </head>
 
 <body>
   <div class="wrap">
     <div class="panel">
-      <h2 style="margin:0 0 6px 0;">Original</h2>
+      <h2 style="margin:0 0 6px 0; flex:0 0 auto;">Original</h2>
 
       <div class="topControls">
         <div>
@@ -139,7 +155,7 @@
     </div>
 
     <div class="panel">
-      <h2 style="margin:0 0 10px 0;">Transcription</h2>
+      <h2 style="margin:0 0 10px 0; flex:0 0 auto;">Transcription</h2>
       <div id="lines"></div>
       <div class="hint">Hover a highlighted region on the image to highlight the matching line here.</div>
     </div>
@@ -147,12 +163,8 @@
 
 <script>
 (async function () {
-  /*
-    Your files:
-    p001.jpg + p001.xml
-    p002.jpg + p002.xml
-    p003.jpg + p003.xml
-  */
+  // Your files (must be in the repo root):
+  // p001.jpg + p001.xml, p002.jpg + p002.xml, p003.jpg + p003.xml
   const PAGES = [
     { label: "Page 1", image: "p001.jpg", xml: "p001.xml" },
     { label: "Page 2", image: "p002.jpg", xml: "p002.xml" },
@@ -238,13 +250,11 @@
 
     clearViewer();
 
-    // Load image
     img.src = image;
     if (!img.complete) {
       await new Promise(res => img.addEventListener("load", res, { once: true }));
     }
 
-    // Load PAGE XML
     const xmlText = await fetch(xml).then(r => {
       if (!r.ok) throw new Error(`Could not load ${xml} (HTTP ${r.status})`);
       return r.text();
@@ -287,7 +297,6 @@
     wireHover();
   }
 
-  // Build dropdown
   PAGES.forEach((p, i) => {
     const opt = document.createElement("option");
     opt.value = String(i);
@@ -295,7 +304,6 @@
     pageSelect.appendChild(opt);
   });
 
-  // Events
   pageSelect.addEventListener("change", () => loadPage(parseInt(pageSelect.value, 10)));
   prevBtn.addEventListener("click", () => loadPage(currentIndex - 1));
   nextBtn.addEventListener("click", () => loadPage(currentIndex + 1));
@@ -306,7 +314,6 @@
     applyZoom(zoom.value);
   });
 
-  // Start
   setButtons();
   await loadPage(0);
 })();
