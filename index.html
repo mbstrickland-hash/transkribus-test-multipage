@@ -16,11 +16,13 @@
       align-items: start;
     }
 
+    /* Smaller panes so scrolling is required */
     .panel{
       border: 1px solid #ddd;
       border-radius: 10px;
       padding: 12px;
       background: #fff;
+
       height: 70vh;
       display: flex;
       flex-direction: column;
@@ -29,6 +31,7 @@
 
     .topControls{
       display: flex;
+      flex-wrap: wrap;
       align-items: center;
       gap: 10px;
       margin: 8px 0 10px 0;
@@ -40,6 +43,7 @@
       padding: 6px 8px;
       border-radius: 8px;
       border: 1px solid #ccc;
+      background: #fff;
     }
 
     .btn{
@@ -49,14 +53,20 @@
       background: #f7f7f7;
       cursor: pointer;
     }
+    .btn:disabled{
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
 
     .zoomRow{
       display: flex;
       align-items: center;
       gap: 10px;
-      margin-left: auto;
+      font-size: 14px;
     }
+    .zoomRow input[type="range"]{ width: 220px; }
 
+    /* Image area scrolls inside the left panel */
     .imgBox{
       position: relative;
       width: 100%;
@@ -79,10 +89,11 @@
       position: absolute;
       top: 0;
       left: 0;
-      pointer-events: none;
+      pointer-events: none; /* enabled per polygon */
       transform-origin: top left;
     }
 
+    /* Transcription area scrolls inside the right panel */
     #lines{
       flex: 1 1 auto;
       min-height: 0;
@@ -94,54 +105,65 @@
       padding: 6px 8px;
       border-radius: 8px;
       margin: 4px 0;
+      cursor: default;
       line-height: 1.25;
     }
     .line:hover{ background: #f2f2f2; }
     .line.active{ background: #ffeaa7; }
 
     .hl{
-      fill: rgba(255,234,167,0.35);
+      fill: rgba(255, 234, 167, 0.35);
       stroke: rgba(0,0,0,0.35);
       stroke-width: 2;
     }
     .hl.active{
-      fill: rgba(255,234,167,0.65);
+      fill: rgba(255, 234, 167, 0.65);
       stroke: rgba(0,0,0,0.6);
     }
+
+    .hint{ color: #555; font-size: 14px; margin-top: 8px; flex: 0 0 auto; }
   </style>
 </head>
 
 <body>
-<div class="wrap">
-  <div class="panel">
-    <h2>Original</h2>
+  <div class="wrap">
+    <div class="panel">
+      <h2 style="margin:0 0 6px 0; flex:0 0 auto;">Original</h2>
 
-    <div class="topControls">
-      Page: <select id="pageSelect"></select>
-      <button class="btn" id="prevBtn">◀</button>
-      <button class="btn" id="nextBtn">▶</button>
+      <div class="topControls">
+        <div>
+          Page:
+          <select id="pageSelect"></select>
+        </div>
 
-      <div class="zoomRow">
-        Zoom:
-        <input id="zoom" type="range" min="1" max="2.5" step="0.05" value="1.15">
-        <span id="zoomVal">1.15×</span>
+        <button class="btn" id="prevBtn">◀ Previous</button>
+        <button class="btn" id="nextBtn">Next ▶</button>
+
+        <div class="zoomRow" style="margin-left:auto;">
+          <div style="min-width:45px;">Zoom:</div>
+          <input id="zoom" type="range" min="1" max="2.5" step="0.05" value="1.15">
+          <div id="zoomVal" style="min-width:60px;">1.15×</div>
+        </div>
       </div>
+
+      <div class="imgBox" id="imgBox">
+        <img id="pageImg" src="" alt="Document page" />
+        <svg class="overlay" id="svgOverlay"></svg>
+      </div>
+
+      <div class="hint">Mouse wheel zooms. Click-and-drag pans. Hover highlights lines.</div>
     </div>
 
-    <div class="imgBox" id="imgBox">
-      <img id="pageImg" />
-      <svg class="overlay" id="svgOverlay"></svg>
+    <div class="panel">
+      <h2 style="margin:0 0 10px 0; flex:0 0 auto;">Transcription</h2>
+      <div id="lines"></div>
+      <div class="hint">Hover a highlighted region on the image to highlight the matching line here.</div>
     </div>
   </div>
-
-  <div class="panel">
-    <h2>Transcription</h2>
-    <div id="lines"></div>
-  </div>
-</div>
 
 <script>
-(async function(){
+(async function () {
+  // Files must exist in repo root:
   const PAGES = [
     { label: "Page 1", image: "p001.jpg", xml: "p001.xml" },
     { label: "Page 2", image: "p002.jpg", xml: "p002.xml" },
@@ -153,106 +175,241 @@
   const svg = document.getElementById("svgOverlay");
   const linesDiv = document.getElementById("lines");
 
+  const pageSelect = document.getElementById("pageSelect");
+  const prevBtn = document.getElementById("prevBtn");
+  const nextBtn = document.getElementById("nextBtn");
+
   const zoomInput = document.getElementById("zoom");
   const zoomVal = document.getElementById("zoomVal");
 
-  let zoom = parseFloat(zoomInput.value);
   let pageIndex = 0;
+  let zoom = parseFloat(zoomInput.value);
+
+  function setButtons(){
+    prevBtn.disabled = pageIndex === 0;
+    nextBtn.disabled = pageIndex === PAGES.length - 1;
+  }
+
+  function syncOverlayToImage(){
+    // Keep overlay aligned with the rendered image size (pre-transform)
+    const z = zoom;
+    const rect = img.getBoundingClientRect();
+    const baseW = rect.width / z;
+    const baseH = rect.height / z;
+    svg.style.width = `${baseW}px`;
+    svg.style.height = `${baseH}px`;
+  }
 
   function applyZoom(newZoom, centerX=null, centerY=null){
     const oldZoom = zoom;
-    zoom = Math.min(2.5, Math.max(1, newZoom));
-    zoomInput.value = zoom;
-    zoomVal.textContent = zoom.toFixed(2) + "×";
+    zoom = Math.min(parseFloat(zoomInput.max), Math.max(parseFloat(zoomInput.min), newZoom));
 
-    if (centerX !== null) {
-      const rect = imgBox.getBoundingClientRect();
+    zoomInput.value = zoom;
+    zoomVal.textContent = `${zoom.toFixed(2)}×`;
+
+    // If mouse-centered zoom requested, preserve the point under cursor
+    if (centerX !== null && centerY !== null) {
       const dx = (centerX + imgBox.scrollLeft) / oldZoom;
       const dy = (centerY + imgBox.scrollTop) / oldZoom;
+
       img.style.transform = `scale(${zoom})`;
       svg.style.transform = `scale(${zoom})`;
+
+      // After transform, re-scroll so cursor stays over same image location
       imgBox.scrollLeft = dx * zoom - centerX;
       imgBox.scrollTop  = dy * zoom - centerY;
     } else {
       img.style.transform = `scale(${zoom})`;
       svg.style.transform = `scale(${zoom})`;
     }
+
+    syncOverlayToImage();
   }
 
+  function clearViewer(){
+    linesDiv.innerHTML = "";
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
+  }
+
+  function setActive(id, on){
+    const lineEl = linesDiv.querySelector(`.line[data-id="${CSS.escape(id)}"]`);
+    const polyEl = svg.querySelector(`polygon[data-id="${CSS.escape(id)}"]`);
+    if (lineEl) lineEl.classList.toggle("active", on);
+    if (polyEl) polyEl.classList.toggle("active", on);
+  }
+
+  function wireHover(){
+    linesDiv.onmouseover = (e) => {
+      const line = e.target.closest(".line");
+      if (!line) return;
+      setActive(line.dataset.id, true);
+    };
+    linesDiv.onmouseout = (e) => {
+      const line = e.target.closest(".line");
+      if (!line) return;
+      setActive(line.dataset.id, false);
+    };
+
+    svg.onmouseover = (e) => {
+      const poly = e.target.closest("polygon[data-id]");
+      if (!poly) return;
+      setActive(poly.dataset.id, true);
+    };
+    svg.onmouseout = (e) => {
+      const poly = e.target.closest("polygon[data-id]");
+      if (!poly) return;
+      setActive(poly.dataset.id, false);
+    };
+  }
+
+  async function loadPage(i){
+    // Clamp and set as source of truth
+    pageIndex = Math.max(0, Math.min(PAGES.length - 1, i));
+
+    // ✅ FIX: keep dropdown synced no matter how we navigated here
+    pageSelect.value = String(pageIndex);
+
+    setButtons();
+
+    const { image, xml } = PAGES[pageIndex];
+
+    clearViewer();
+
+    // Reset scroll position when switching pages (optional, feels clean)
+    imgBox.scrollLeft = 0;
+    imgBox.scrollTop = 0;
+
+    // Load image
+    img.src = image;
+    if (!img.complete) {
+      await new Promise(res => img.addEventListener("load", res, { once: true }));
+    }
+
+    // Load PAGE XML
+    const xmlText = await fetch(xml).then(r => {
+      if (!r.ok) throw new Error(`Could not load ${xml} (HTTP ${r.status})`);
+      return r.text();
+    });
+
+    const doc = new DOMParser().parseFromString(xmlText, "application/xml");
+    const pageNode = doc.querySelector("PcGts > Page") || doc.querySelector("Page");
+    const imageW = parseFloat(pageNode.getAttribute("imageWidth"));
+    const imageH = parseFloat(pageNode.getAttribute("imageHeight"));
+
+    svg.setAttribute("viewBox", `0 0 ${imageW} ${imageH}`);
+    svg.setAttribute("preserveAspectRatio", "none");
+
+    const textLines = [...doc.querySelectorAll("TextLine")].map((tl, idx) => {
+      const id = tl.getAttribute("id") || `line_${idx+1}`;
+      const coords = tl.querySelector("Coords")?.getAttribute("points") || "";
+      const unicode = tl.querySelector("TextEquiv > Unicode")?.textContent?.trim()
+                   || tl.querySelector("Unicode")?.textContent?.trim()
+                   || "";
+      return { id, coords, unicode };
+    }).filter(x => x.coords && x.unicode);
+
+    // Render transcription + polygons
+    for (const item of textLines) {
+      const div = document.createElement("div");
+      div.className = "line";
+      div.dataset.id = item.id;
+      div.textContent = item.unicode;
+      linesDiv.appendChild(div);
+    }
+
+    for (const item of textLines) {
+      const poly = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+      poly.setAttribute("points", item.coords);
+      poly.setAttribute("class", "hl");
+      poly.dataset.id = item.id;
+      poly.style.pointerEvents = "auto";
+      svg.appendChild(poly);
+    }
+
+    wireHover();
+
+    // Ensure current zoom applied after new content loads
+    applyZoom(zoom);
+  }
+
+  // Build dropdown options
+  PAGES.forEach((p, i) => {
+    const opt = document.createElement("option");
+    opt.value = String(i);
+    opt.textContent = p.label;
+    pageSelect.appendChild(opt);
+  });
+
+  // Dropdown navigation
+  pageSelect.addEventListener("change", () => {
+    loadPage(parseInt(pageSelect.value, 10));
+  });
+
+  // Arrow navigation
+  prevBtn.addEventListener("click", () => loadPage(pageIndex - 1));
+  nextBtn.addEventListener("click", () => loadPage(pageIndex + 1));
+
+  // Slider zoom
   zoomInput.addEventListener("input", () => applyZoom(parseFloat(zoomInput.value)));
 
-  /* Mouse wheel zoom */
+  // Mouse wheel zoom (centered on cursor)
   imgBox.addEventListener("wheel", (e) => {
-    if (!e.ctrlKey) e.preventDefault();
-    const delta = e.deltaY > 0 ? -0.1 : 0.1;
+    // Prevent page scroll while interacting with the image pane
+    e.preventDefault();
+
+    // Natural wheel: up = zoom in, down = zoom out
+    const step = 0.10;
+    const delta = (e.deltaY < 0) ? step : -step;
+
+    // offsetX/Y are relative to the imgBox, which is what we want
     applyZoom(zoom + delta, e.offsetX, e.offsetY);
   }, { passive: false });
 
-  /* Drag to pan */
-  let dragging = false, sx=0, sy=0, sl=0, st=0;
-  imgBox.addEventListener("mousedown", e=>{
-    if(e.button!==0) return;
-    dragging=true;
+  // Click-and-drag panning
+  let isDragging = false;
+  let startX = 0, startY = 0;
+  let startScrollLeft = 0, startScrollTop = 0;
+
+  imgBox.addEventListener("mousedown", (e) => {
+    if (e.button !== 0) return; // left button only
+    isDragging = true;
     imgBox.classList.add("dragging");
-    sx=e.clientX; sy=e.clientY;
-    sl=imgBox.scrollLeft; st=imgBox.scrollTop;
+    startX = e.clientX;
+    startY = e.clientY;
+    startScrollLeft = imgBox.scrollLeft;
+    startScrollTop = imgBox.scrollTop;
     e.preventDefault();
   });
-  window.addEventListener("mousemove", e=>{
-    if(!dragging) return;
-    imgBox.scrollLeft = sl - (e.clientX - sx);
-    imgBox.scrollTop  = st - (e.clientY - sy);
+
+  window.addEventListener("mousemove", (e) => {
+    if (!isDragging) return;
+    const dx = e.clientX - startX;
+    const dy = e.clientY - startY;
+    imgBox.scrollLeft = startScrollLeft - dx;
+    imgBox.scrollTop  = startScrollTop  - dy;
   });
-  window.addEventListener("mouseup", ()=>{
-    dragging=false;
+
+  window.addEventListener("mouseup", () => {
+    if (!isDragging) return;
+    isDragging = false;
     imgBox.classList.remove("dragging");
   });
 
-  function loadPage(i){
-    pageIndex=i;
-    img.src = PAGES[i].image;
-    fetch(PAGES[i].xml).then(r=>r.text()).then(txt=>{
-      const doc = new DOMParser().parseFromString(txt,"application/xml");
-      const page = doc.querySelector("Page");
-      svg.setAttribute("viewBox",`0 0 ${page.getAttribute("imageWidth")} ${page.getAttribute("imageHeight")}`);
-      svg.innerHTML="";
-      linesDiv.innerHTML="";
-
-      doc.querySelectorAll("TextLine").forEach(t=>{
-        const id = t.getAttribute("id");
-        const pts = t.querySelector("Coords")?.getAttribute("points");
-        const text = t.querySelector("Unicode")?.textContent;
-        if(!pts||!text) return;
-
-        const div=document.createElement("div");
-        div.className="line"; div.textContent=text;
-        linesDiv.appendChild(div);
-
-        const poly=document.createElementNS("http://www.w3.org/2000/svg","polygon");
-        poly.setAttribute("points",pts);
-        poly.classList.add("hl");
-        svg.appendChild(poly);
-
-        div.onmouseenter=()=>poly.classList.add("active");
-        div.onmouseleave=()=>poly.classList.remove("active");
-        poly.onmouseenter=()=>div.classList.add("active");
-        poly.onmouseleave=()=>div.classList.remove("active");
-      });
-    });
-  }
-
-  PAGES.forEach((p,i)=>{
-    const o=document.createElement("option");
-    o.value=i; o.textContent=p.label;
-    pageSelect.appendChild(o);
+  window.addEventListener("blur", () => {
+    if (!isDragging) return;
+    isDragging = false;
+    imgBox.classList.remove("dragging");
   });
 
-  pageSelect.onchange=()=>loadPage(+pageSelect.value);
-  prevBtn.onclick=()=>loadPage(Math.max(0,pageIndex-1));
-  nextBtn.onclick=()=>loadPage(Math.min(PAGES.length-1,pageIndex+1));
+  // Keep overlay aligned if the window resizes
+  window.addEventListener("resize", () => {
+    syncOverlayToImage();
+    applyZoom(zoom);
+  });
 
-  applyZoom(zoom);
-  loadPage(0);
+  // Start
+  setButtons();
+  await loadPage(0);
 })();
 </script>
 </body>
