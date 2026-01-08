@@ -126,13 +126,15 @@ const PAGES=[
  {label:"Page 3",image:"p003.jpg",xml:"p003.xml"}
 ];
 
-const imgBox=imgBox=document.getElementById("imgBox");
+const imgBox=document.getElementById("imgBox");
 const img=document.getElementById("img");
 const svg=document.getElementById("svg");
 const lines=document.getElementById("linePane");
 const zoomInput=document.getElementById("zoom");
 const pageSelect=document.getElementById("pageSelect");
 const indicator=document.getElementById("indicator");
+const prev=document.getElementById("prev");
+const next=document.getElementById("next");
 
 let zoom=parseFloat(zoomInput.value);
 let page=0;
@@ -223,7 +225,10 @@ async function load(i){
   div.className="line";
   div.dataset.id=id;
   div.textContent=txt;
+
+  /* CLICK = sync */
   div.onclick=()=>{setActive(id);scrollImageTo(id);};
+
   lines.appendChild(div);
 
   const poly=document.createElementNS("http://www.w3.org/2000/svg","polygon");
@@ -231,7 +236,10 @@ async function load(i){
   poly.dataset.id=id;
   poly.classList.add("hl");
   poly.style.pointerEvents="auto";
+
+  /* CLICK = sync */
   poly.onclick=()=>{setActive(id);scrollTextTo(id);};
+
   svg.appendChild(poly);
  });
 
