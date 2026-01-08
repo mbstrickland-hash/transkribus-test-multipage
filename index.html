@@ -10,28 +10,25 @@
 
     .wrap{
       display: grid;
-      grid-template-columns: 3fr 2fr; /* ~60/40 */
+      grid-template-columns: 3fr 2fr;
       gap: 16px;
       padding: 16px;
       align-items: start;
     }
 
-    /* Smaller panes so scrolling is required */
     .panel{
       border: 1px solid #ddd;
       border-radius: 10px;
       padding: 12px;
       background: #fff;
-
-      height: 70vh;              /* smaller than before */
+      height: 70vh;
       display: flex;
       flex-direction: column;
-      min-height: 0;             /* critical for scroll children */
+      min-height: 0;
     }
 
     .topControls{
       display: flex;
-      flex-wrap: wrap;
       align-items: center;
       gap: 10px;
       margin: 8px 0 10px 0;
@@ -43,7 +40,6 @@
       padding: 6px 8px;
       border-radius: 8px;
       border: 1px solid #ccc;
-      background: #fff;
     }
 
     .btn{
@@ -53,20 +49,14 @@
       background: #f7f7f7;
       cursor: pointer;
     }
-    .btn:disabled{
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
 
     .zoomRow{
       display: flex;
       align-items: center;
       gap: 10px;
-      font-size: 14px;
+      margin-left: auto;
     }
-    .zoomRow input[type="range"]{ width: 220px; }
 
-    /* Image area scrolls inside the left panel */
     .imgBox{
       position: relative;
       width: 100%;
@@ -74,8 +64,6 @@
       min-height: 0;
       overflow: auto;
       border-radius: 10px;
-
-      /* NEW: grab-to-pan cursor */
       cursor: grab;
     }
     .imgBox.dragging{ cursor: grabbing; }
@@ -84,18 +72,17 @@
       display: block;
       width: 100%;
       height: auto;
+      transform-origin: top left;
     }
 
     .overlay{
       position: absolute;
       top: 0;
       left: 0;
-      pointer-events: none; /* enabled per polygon */
+      pointer-events: none;
+      transform-origin: top left;
     }
 
-    .imgBox img, .overlay { transform-origin: top left; }
-
-    /* Transcription area scrolls inside the right panel */
     #lines{
       flex: 1 1 auto;
       min-height: 0;
@@ -107,65 +94,54 @@
       padding: 6px 8px;
       border-radius: 8px;
       margin: 4px 0;
-      cursor: default;
       line-height: 1.25;
     }
     .line:hover{ background: #f2f2f2; }
     .line.active{ background: #ffeaa7; }
 
     .hl{
-      fill: rgba(255, 234, 167, 0.35);
+      fill: rgba(255,234,167,0.35);
       stroke: rgba(0,0,0,0.35);
       stroke-width: 2;
     }
     .hl.active{
-      fill: rgba(255, 234, 167, 0.65);
+      fill: rgba(255,234,167,0.65);
       stroke: rgba(0,0,0,0.6);
     }
-
-    .hint{ color: #555; font-size: 14px; margin-top: 8px; flex: 0 0 auto; }
   </style>
 </head>
 
 <body>
-  <div class="wrap">
-    <div class="panel">
-      <h2 style="margin:0 0 6px 0; flex:0 0 auto;">Original</h2>
+<div class="wrap">
+  <div class="panel">
+    <h2>Original</h2>
 
-      <div class="topControls">
-        <div>
-          Page:
-          <select id="pageSelect"></select>
-        </div>
+    <div class="topControls">
+      Page: <select id="pageSelect"></select>
+      <button class="btn" id="prevBtn">◀</button>
+      <button class="btn" id="nextBtn">▶</button>
 
-        <button class="btn" id="prevBtn">◀ Previous</button>
-        <button class="btn" id="nextBtn">Next ▶</button>
-
-        <div class="zoomRow" style="margin-left:auto;">
-          <div style="min-width:45px;">Zoom:</div>
-          <input id="zoom" type="range" min="1" max="2.0" step="0.05" value="1.15">
-          <div id="zoomVal" style="min-width:60px;">1.15×</div>
-        </div>
+      <div class="zoomRow">
+        Zoom:
+        <input id="zoom" type="range" min="1" max="2.5" step="0.05" value="1.15">
+        <span id="zoomVal">1.15×</span>
       </div>
-
-      <div class="imgBox" id="imgBox">
-        <img id="pageImg" src="" alt="Document page" />
-        <svg class="overlay" id="svgOverlay"></svg>
-      </div>
-
-      <div class="hint">Click and drag (hold left mouse button) to move the image when zoomed in.</div>
     </div>
 
-    <div class="panel">
-      <h2 style="margin:0 0 10px 0; flex:0 0 auto;">Transcription</h2>
-      <div id="lines"></div>
-      <div class="hint">Hover a highlighted region on the image to highlight the matching line here.</div>
+    <div class="imgBox" id="imgBox">
+      <img id="pageImg" />
+      <svg class="overlay" id="svgOverlay"></svg>
     </div>
   </div>
 
+  <div class="panel">
+    <h2>Transcription</h2>
+    <div id="lines"></div>
+  </div>
+</div>
+
 <script>
-(async function () {
-  // Your files (must be in the repo root):
+(async function(){
   const PAGES = [
     { label: "Page 1", image: "p001.jpg", xml: "p001.xml" },
     { label: "Page 2", image: "p002.jpg", xml: "p002.xml" },
@@ -177,193 +153,106 @@
   const svg = document.getElementById("svgOverlay");
   const linesDiv = document.getElementById("lines");
 
-  const pageSelect = document.getElementById("pageSelect");
-  const prevBtn = document.getElementById("prevBtn");
-  const nextBtn = document.getElementById("nextBtn");
-
-  const zoom = document.getElementById("zoom");
+  const zoomInput = document.getElementById("zoom");
   const zoomVal = document.getElementById("zoomVal");
 
-  let currentIndex = 0;
+  let zoom = parseFloat(zoomInput.value);
+  let pageIndex = 0;
 
-  function applyZoom(z){
-    img.style.transform = `scale(${z})`;
-    svg.style.transform = `scale(${z})`;
-    zoomVal.textContent = `${z}×`;
-    syncOverlayToImage();
+  function applyZoom(newZoom, centerX=null, centerY=null){
+    const oldZoom = zoom;
+    zoom = Math.min(2.5, Math.max(1, newZoom));
+    zoomInput.value = zoom;
+    zoomVal.textContent = zoom.toFixed(2) + "×";
+
+    if (centerX !== null) {
+      const rect = imgBox.getBoundingClientRect();
+      const dx = (centerX + imgBox.scrollLeft) / oldZoom;
+      const dy = (centerY + imgBox.scrollTop) / oldZoom;
+      img.style.transform = `scale(${zoom})`;
+      svg.style.transform = `scale(${zoom})`;
+      imgBox.scrollLeft = dx * zoom - centerX;
+      imgBox.scrollTop  = dy * zoom - centerY;
+    } else {
+      img.style.transform = `scale(${zoom})`;
+      svg.style.transform = `scale(${zoom})`;
+    }
   }
 
-  function syncOverlayToImage(){
-    const z = parseFloat(zoom.value);
-    const rect = img.getBoundingClientRect();
-    const baseW = rect.width / z;
-    const baseH = rect.height / z;
-    svg.style.width = `${baseW}px`;
-    svg.style.height = `${baseH}px`;
-  }
+  zoomInput.addEventListener("input", () => applyZoom(parseFloat(zoomInput.value)));
 
-  /* NEW: Click-and-drag panning inside the image pane */
-  let isDragging = false;
-  let startX = 0, startY = 0;
-  let startScrollLeft = 0, startScrollTop = 0;
+  /* Mouse wheel zoom */
+  imgBox.addEventListener("wheel", (e) => {
+    if (!e.ctrlKey) e.preventDefault();
+    const delta = e.deltaY > 0 ? -0.1 : 0.1;
+    applyZoom(zoom + delta, e.offsetX, e.offsetY);
+  }, { passive: false });
 
-  imgBox.addEventListener("mousedown", (e) => {
-    if (e.button !== 0) return; // left mouse button only
-
-    // avoid starting a drag if clicking on UI controls (defensive)
-    if (e.target.closest("select, button, input, a, label")) return;
-
-    isDragging = true;
+  /* Drag to pan */
+  let dragging = false, sx=0, sy=0, sl=0, st=0;
+  imgBox.addEventListener("mousedown", e=>{
+    if(e.button!==0) return;
+    dragging=true;
     imgBox.classList.add("dragging");
-
-    startX = e.clientX;
-    startY = e.clientY;
-    startScrollLeft = imgBox.scrollLeft;
-    startScrollTop = imgBox.scrollTop;
-
-    e.preventDefault(); // prevent text selection
+    sx=e.clientX; sy=e.clientY;
+    sl=imgBox.scrollLeft; st=imgBox.scrollTop;
+    e.preventDefault();
   });
-
-  window.addEventListener("mousemove", (e) => {
-    if (!isDragging) return;
-    const dx = e.clientX - startX;
-    const dy = e.clientY - startY;
-    imgBox.scrollLeft = startScrollLeft - dx;
-    imgBox.scrollTop  = startScrollTop  - dy;
+  window.addEventListener("mousemove", e=>{
+    if(!dragging) return;
+    imgBox.scrollLeft = sl - (e.clientX - sx);
+    imgBox.scrollTop  = st - (e.clientY - sy);
   });
-
-  window.addEventListener("mouseup", () => {
-    if (!isDragging) return;
-    isDragging = false;
+  window.addEventListener("mouseup", ()=>{
+    dragging=false;
     imgBox.classList.remove("dragging");
   });
 
-  window.addEventListener("blur", () => {
-    if (!isDragging) return;
-    isDragging = false;
-    imgBox.classList.remove("dragging");
-  });
+  function loadPage(i){
+    pageIndex=i;
+    img.src = PAGES[i].image;
+    fetch(PAGES[i].xml).then(r=>r.text()).then(txt=>{
+      const doc = new DOMParser().parseFromString(txt,"application/xml");
+      const page = doc.querySelector("Page");
+      svg.setAttribute("viewBox",`0 0 ${page.getAttribute("imageWidth")} ${page.getAttribute("imageHeight")}`);
+      svg.innerHTML="";
+      linesDiv.innerHTML="";
 
-  function clearViewer(){
-    linesDiv.innerHTML = "";
-    while (svg.firstChild) svg.removeChild(svg.firstChild);
-  }
+      doc.querySelectorAll("TextLine").forEach(t=>{
+        const id = t.getAttribute("id");
+        const pts = t.querySelector("Coords")?.getAttribute("points");
+        const text = t.querySelector("Unicode")?.textContent;
+        if(!pts||!text) return;
 
-  function setButtons(){
-    prevBtn.disabled = currentIndex === 0;
-    nextBtn.disabled = currentIndex === PAGES.length - 1;
-  }
+        const div=document.createElement("div");
+        div.className="line"; div.textContent=text;
+        linesDiv.appendChild(div);
 
-  function setActive(id, on){
-    const lineEl = linesDiv.querySelector(`.line[data-id="${CSS.escape(id)}"]`);
-    const polyEl = svg.querySelector(`polygon[data-id="${CSS.escape(id)}"]`);
-    if (lineEl) lineEl.classList.toggle("active", on);
-    if (polyEl) polyEl.classList.toggle("active", on);
-  }
+        const poly=document.createElementNS("http://www.w3.org/2000/svg","polygon");
+        poly.setAttribute("points",pts);
+        poly.classList.add("hl");
+        svg.appendChild(poly);
 
-  function wireHover(){
-    linesDiv.onmouseover = (e) => {
-      const line = e.target.closest(".line");
-      if (!line) return;
-      setActive(line.dataset.id, true);
-    };
-    linesDiv.onmouseout = (e) => {
-      const line = e.target.closest(".line");
-      if (!line) return;
-      setActive(line.dataset.id, false);
-    };
-
-    svg.onmouseover = (e) => {
-      const poly = e.target.closest("polygon[data-id]");
-      if (!poly) return;
-      setActive(poly.dataset.id, true);
-    };
-    svg.onmouseout = (e) => {
-      const poly = e.target.closest("polygon[data-id]");
-      if (!poly) return;
-      setActive(poly.dataset.id, false);
-    };
-  }
-
-  async function loadPage(index){
-    currentIndex = index;
-    pageSelect.value = String(index);
-    setButtons();
-
-    const { image, xml } = PAGES[index];
-
-    clearViewer();
-
-    // Reset scroll positions when switching pages (optional but feels cleaner)
-    imgBox.scrollLeft = 0;
-    imgBox.scrollTop = 0;
-
-    img.src = image;
-    if (!img.complete) {
-      await new Promise(res => img.addEventListener("load", res, { once: true }));
-    }
-
-    const xmlText = await fetch(xml).then(r => {
-      if (!r.ok) throw new Error(`Could not load ${xml} (HTTP ${r.status})`);
-      return r.text();
+        div.onmouseenter=()=>poly.classList.add("active");
+        div.onmouseleave=()=>poly.classList.remove("active");
+        poly.onmouseenter=()=>div.classList.add("active");
+        poly.onmouseleave=()=>div.classList.remove("active");
+      });
     });
-
-    const doc = new DOMParser().parseFromString(xmlText, "application/xml");
-    const pageNode = doc.querySelector("PcGts > Page");
-    const imageW = parseFloat(pageNode.getAttribute("imageWidth"));
-    const imageH = parseFloat(pageNode.getAttribute("imageHeight"));
-
-    svg.setAttribute("viewBox", `0 0 ${imageW} ${imageH}`);
-    svg.setAttribute("preserveAspectRatio", "none");
-
-    const textLines = [...doc.querySelectorAll("TextLine")].map((tl, idx) => {
-      const id = tl.getAttribute("id") || `line_${idx+1}`;
-      const coords = tl.querySelector("Coords")?.getAttribute("points") || "";
-      const unicode = tl.querySelector("TextEquiv > Unicode")?.textContent?.trim() || "";
-      return { id, coords, unicode };
-    }).filter(x => x.coords && x.unicode);
-
-    for (const item of textLines) {
-      const div = document.createElement("div");
-      div.className = "line";
-      div.dataset.id = item.id;
-      div.textContent = item.unicode;
-      linesDiv.appendChild(div);
-    }
-
-    for (const item of textLines) {
-      const poly = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
-      poly.setAttribute("points", item.coords);
-      poly.setAttribute("class", "hl");
-      poly.dataset.id = item.id;
-      poly.style.pointerEvents = "auto";
-      svg.appendChild(poly);
-    }
-
-    syncOverlayToImage();
-    applyZoom(zoom.value);
-    wireHover();
   }
 
-  PAGES.forEach((p, i) => {
-    const opt = document.createElement("option");
-    opt.value = String(i);
-    opt.textContent = p.label;
-    pageSelect.appendChild(opt);
+  PAGES.forEach((p,i)=>{
+    const o=document.createElement("option");
+    o.value=i; o.textContent=p.label;
+    pageSelect.appendChild(o);
   });
 
-  pageSelect.addEventListener("change", () => loadPage(parseInt(pageSelect.value, 10)));
-  prevBtn.addEventListener("click", () => loadPage(currentIndex - 1));
-  nextBtn.addEventListener("click", () => loadPage(currentIndex + 1));
+  pageSelect.onchange=()=>loadPage(+pageSelect.value);
+  prevBtn.onclick=()=>loadPage(Math.max(0,pageIndex-1));
+  nextBtn.onclick=()=>loadPage(Math.min(PAGES.length-1,pageIndex+1));
 
-  zoom.addEventListener("input", () => applyZoom(zoom.value));
-  window.addEventListener("resize", () => {
-    syncOverlayToImage();
-    applyZoom(zoom.value);
-  });
-
-  setButtons();
-  await loadPage(0);
+  applyZoom(zoom);
+  loadPage(0);
 })();
 </script>
 </body>
